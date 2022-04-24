@@ -23,13 +23,27 @@
 /* USER CODE BEGIN Includes */
 #include "ili9341.h"
 #include "stm32f429i_discovery_lcd.h"
-#include "st_logo1.h"
-#include "st_logo2.h"
+#include "l3gd20.h"
+#include "stm32f429i_discovery_gyroscope.h"
+//#include "st_logo1.h"
+//#include "st_logo2.h"
+//#include "Rectangle_2.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
+/**
+ * @brief struct of an obstacle
+ * @det has X, Y beginnig positions, width and height
+ */
+typedef struct
+{
+	uint16_t Xpos;
+	uint16_t Ypos;
+	uint16_t Width;
+	uint16_t Height;
+}ObstacleDef;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -53,7 +67,7 @@ SPI_HandleTypeDef hspi5;
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
-
+GYRO_DrvTypeDef gyroscope;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -65,7 +79,7 @@ static void MX_I2C3_Init(void);
 static void MX_LTDC_Init(void);
 static void MX_SPI5_Init(void);
 /* USER CODE BEGIN PFP */
-
+void Draw_Obstacle(ObstacleDef *obs);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -80,7 +94,6 @@ static void MX_SPI5_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -96,12 +109,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  BSP_LCD_Init();
-  BSP_LCD_LayerDefaultInit(LCD_BACKGROUND_LAYER, LCD_FRAME_BUFFER);
-  BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER);
-  BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
-  BSP_LCD_DisplayOn();
-  BSP_LCD_Clear(LCD_COLOR_WHITE);
+
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -113,27 +121,70 @@ int main(void)
   MX_SPI5_Init();
   /* USER CODE BEGIN 2 */
 
+  BSP_LCD_Init();
+  BSP_LCD_LayerDefaultInit(LCD_BACKGROUND_LAYER, LCD_FRAME_BUFFER);
+  BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER);
+
+  BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
+  BSP_LCD_DisplayOn();
+  BSP_LCD_Clear(LCD_COLOR_WHITE);
+
+  if(BSP_GYRO_Init() == GYRO_OK)
+	  BSP_LCD_DisplayStringAtLine(1, (uint8_t*)"[SUCCESS]");
+  else
+	  BSP_LCD_DisplayStringAtLine(1, (uint8_t*)"[ERROR]");
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+
+  BSP_GYRO_Reset();
+
+  float XYZ[3] = {0x00, 0x00, 0x00};
+
+  int Xpos = BSP_LCD_GetXSize()/2;
+  int Ypos = 60;
+
+  ObstacleDef Obs_Left = {0, BSP_LCD_GetYSize()-30, 60, 30};
+  ObstacleDef Obs_Right = {BSP_LCD_GetXSize()-100, BSP_LCD_GetYSize()-60, 100, 30};
   while (1)
   {
-	  BSP_LCD_SetTextColor(LCD_COLOR_DARKGRAY);
-	  BSP_LCD_DisplayStringAtLine(1, (uint8_t*)"TEXT 1");
-	  BSP_LCD_SetTextColor(LCD_COLOR_DARKGRAY);
-	  BSP_LCD_DisplayStringAtLine(2, (uint8_t*)"TEXT 2");
-	  BSP_LCD_SetTextColor(LCD_COLOR_DARKGRAY);
-	  BSP_LCD_DisplayStringAtLine(3, (uint8_t*)"TEXT 3");
-	  BSP_LCD_SetTextColor(LCD_COLOR_DARKGRAY);
-	  BSP_LCD_DisplayStringAtLine(4, (uint8_t*)"TEXT 4");
-	  HAL_Delay(1000);
+	  BSP_GYRO_GetXYZ(XYZ);
+	  Xpos += (int)XYZ[1]/500;
+	  if(Xpos > BSP_LCD_GetXSize() - 20)
+		  Xpos = BSP_LCD_GetXSize() - 20;
+	  else if(Xpos <20)
+		  Xpos = 20;
+//	  Background Layer To razej do jakiejś zmiany, żeby nie pisać pozycji dla każdej przeszkody
+	  Draw_Obstacle(&Obs_Left);
+	  Obs_Left.Ypos -= 1;
+	  if(Obs_Left.Ypos <= 30)
+		  Obs_Left.Ypos = BSP_LCD_GetYSize()-30;
+	  Draw_Obstacle(&Obs_Right);
+	  Obs_Right.Ypos -= 1;
+	  if(Obs_Right.Ypos <= 30)
+		  Obs_Right.Ypos = BSP_LCD_GetYSize()-30;
+//	  Foreground Layer
+	  BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
+	  BSP_LCD_SetTextColor(LCD_COLOR_LIGHTMAGENTA);
+	  BSP_LCD_FillCircle(Xpos, Ypos+20, 20);
+
+//	  Delay
+	  HAL_Delay(50);
 	  BSP_LCD_Clear(LCD_COLOR_WHITE);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
+}
+
+void Draw_Obstacle(ObstacleDef *obs)
+{
+	BSP_LCD_SetTextColor(LCD_COLOR_BROWN);
+	BSP_LCD_FillRect(obs->Xpos, obs->Ypos, obs->Width, obs->Height);
 }
 
 /**
@@ -156,8 +207,8 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 360;
+  RCC_OscInitStruct.PLL.PLLM = 4;
+  RCC_OscInitStruct.PLL.PLLN = 180;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 7;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -176,8 +227,8 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV8;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
   {
@@ -277,7 +328,7 @@ static void MX_LTDC_Init(void)
 {
 
   /* USER CODE BEGIN LTDC_Init 0 */
-
+	ili9341_Init();
   /* USER CODE END LTDC_Init 0 */
 
   LTDC_LayerCfgTypeDef pLayerCfg = {0};
@@ -291,14 +342,14 @@ static void MX_LTDC_Init(void)
   hltdc.Init.VSPolarity = LTDC_VSPOLARITY_AL;
   hltdc.Init.DEPolarity = LTDC_DEPOLARITY_AL;
   hltdc.Init.PCPolarity = LTDC_PCPOLARITY_IPC;
-  hltdc.Init.HorizontalSync = 7;
-  hltdc.Init.VerticalSync = 3;
-  hltdc.Init.AccumulatedHBP = 14;
-  hltdc.Init.AccumulatedVBP = 5;
-  hltdc.Init.AccumulatedActiveW = 334;
-  hltdc.Init.AccumulatedActiveH = 245;
-  hltdc.Init.TotalWidth = 340;
-  hltdc.Init.TotalHeigh = 247;
+  hltdc.Init.HorizontalSync = 9;
+  hltdc.Init.VerticalSync = 1;
+  hltdc.Init.AccumulatedHBP = 29;
+  hltdc.Init.AccumulatedVBP = 3;
+  hltdc.Init.AccumulatedActiveW = 269;
+  hltdc.Init.AccumulatedActiveH = 323;
+  hltdc.Init.TotalWidth = 279;
+  hltdc.Init.TotalHeigh = 327;
   hltdc.Init.Backcolor.Blue = 0;
   hltdc.Init.Backcolor.Green = 0;
   hltdc.Init.Backcolor.Red = 0;
@@ -307,15 +358,15 @@ static void MX_LTDC_Init(void)
     Error_Handler();
   }
   pLayerCfg.WindowX0 = 0;
-  pLayerCfg.WindowX1 = 0;
+  pLayerCfg.WindowX1 = 240;
   pLayerCfg.WindowY0 = 0;
-  pLayerCfg.WindowY1 = 0;
-  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_ARGB8888;
+  pLayerCfg.WindowY1 = 320;
+  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
   pLayerCfg.Alpha = 0;
   pLayerCfg.Alpha0 = 0;
   pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
   pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-  pLayerCfg.FBStartAdress = 0;
+  pLayerCfg.FBStartAdress = FRAME_BUFFER_DEAFULT;
   pLayerCfg.ImageWidth = 0;
   pLayerCfg.ImageHeight = 0;
   pLayerCfg.Backcolor.Blue = 0;
@@ -326,10 +377,10 @@ static void MX_LTDC_Init(void)
     Error_Handler();
   }
   pLayerCfg1.WindowX0 = 0;
-  pLayerCfg1.WindowX1 = 0;
+  pLayerCfg1.WindowX1 = 240;
   pLayerCfg1.WindowY0 = 0;
-  pLayerCfg1.WindowY1 = 0;
-  pLayerCfg1.PixelFormat = LTDC_PIXEL_FORMAT_ARGB8888;
+  pLayerCfg1.WindowY1 = 320;
+  pLayerCfg1.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
   pLayerCfg1.Alpha = 0;
   pLayerCfg1.Alpha0 = 0;
   pLayerCfg1.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
@@ -373,7 +424,7 @@ static void MX_SPI5_Init(void)
   hspi5.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi5.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi5.Init.NSS = SPI_NSS_SOFT;
-  hspi5.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi5.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
   hspi5.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi5.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi5.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
