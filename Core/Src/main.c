@@ -198,9 +198,8 @@ int main(void)
 
 	  HAL_LTDC_Reload(&LtdcHandle,LTDC_SRCR_VBR);
 
-	  while(ReloadFlag == 0)	{/* wait till reload takes effect (in the next vertical blanking period) */}
-//	  Delay
-//	  HAL_Delay(50);
+	  while(ReloadFlag == 0) 	{/* wait till reload takes effect */}
+
 	  BSP_LCD_Clear(LCD_COLOR_BLACK);
 
     /* USER CODE END WHILE */
