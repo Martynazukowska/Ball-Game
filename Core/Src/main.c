@@ -49,6 +49,7 @@ typedef struct
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define ALPHA 0.60f
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -75,6 +76,8 @@ LTDC_HandleTypeDef LtdcHandle;
 
 __IO uint32_t ReloadFlag = 0;
 __IO float X = 0;
+
+FirstOrderIIR_t filter;
 
 /* USER CODE END PV */
 
@@ -112,7 +115,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  FirstOrderIIR_Init(&filter, ALPHA);
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -839,7 +842,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		float XYZ[3];
 		BSP_GYRO_GetXYZ(XYZ);
-		X = XYZ[1];
+		X = FirstOrderIIR_Update(&filter, XYZ[1]);
 	}
 }
 /* USER CODE END 4 */

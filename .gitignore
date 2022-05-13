@@ -3,3 +3,4 @@ Release/*
 .gitignore
 'Ball-Game Debug.launch'
 Ball-Game Debug.launch
+/Debug/
