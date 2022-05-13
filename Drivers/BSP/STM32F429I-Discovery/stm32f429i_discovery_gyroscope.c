@@ -96,7 +96,7 @@ uint8_t BSP_GYRO_Init(void)
     Gyro_InitStructure.Band_Width       = L3GD20_BANDWIDTH_1;
     Gyro_InitStructure.BlockData_Update = L3GD20_BlockDataUpdate_Continous;
     Gyro_InitStructure.Endianness       = L3GD20_BLE_LSB;
-    Gyro_InitStructure.Full_Scale       = L3GD20_FULLSCALE_250;	//CHANGED - original L3GD20_FULLSCALE_500
+    Gyro_InitStructure.Full_Scale       = L3GD20_FULLSCALE_2000;	//CHANGED - original L3GD20_FULLSCALE_500
 
     /* Configure MEMS: data rate, power mode, full scale and axes */
     ctrl = (uint16_t) (Gyro_InitStructure.Power_Mode  | Gyro_InitStructure.Output_DataRate | \
