@@ -25,6 +25,7 @@
 #include "stm32f429i_discovery_lcd.h"
 #include "l3gd20.h"
 #include "stm32f429i_discovery_gyroscope.h"
+#include "FirstOrderIIR.h"
 //#include "st_logo1.h"
 //#include "st_logo2.h"
 //#include "Rectangle_2.h"
