@@ -155,7 +155,7 @@ int main(void)
   }
   BSP_GYRO_Reset();
 
-  int Xpos = BSP_LCD_GetXSize()/2;
+  float Xpos = BSP_LCD_GetXSize()/2;
   int Ypos = 60;
 
   ObstacleDef Obs_Left = {0, BSP_LCD_GetYSize()-30, 60, 30};
@@ -170,7 +170,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  Xpos += (int)X/2500;
+	  Xpos += X * 0.07 * 0.0008;
 	  if(Xpos > BSP_LCD_GetXSize() - 20)
 		  Xpos = BSP_LCD_GetXSize() - 20;
 	  else if(Xpos <20)
