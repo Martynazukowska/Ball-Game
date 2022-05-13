@@ -146,23 +146,14 @@ int main(void)
 
   BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
   BSP_LCD_DisplayOn();
-  //BSP_LCD_Clear(LCD_COLOR_WHITE);
   BSP_LCD_Clear(LCD_COLOR_BLACK);
 
-  if(BSP_GYRO_Init() == GYRO_OK)
-	  BSP_LCD_DisplayStringAtLine(1, (uint8_t*)"[SUCCESS]");
-  else
-	  BSP_LCD_DisplayStringAtLine(1, (uint8_t*)"[ERROR]");
-
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-
-
+  if(BSP_GYRO_Init() != GYRO_OK)
+  {
+	  BSP_LCD_DisplayStringAtLine(1, (uint8_t*)"[FAIL]");
+	  return -1;
+  }
   BSP_GYRO_Reset();
-
-//  float XYZ[3] = {0x00, 0x00, 0x00};
 
   int Xpos = BSP_LCD_GetXSize()/2;
   int Ypos = 60;
@@ -171,13 +162,14 @@ int main(void)
   ObstacleDef Obs_Right = {BSP_LCD_GetXSize()-100, BSP_LCD_GetYSize()-60, 100, 30};
 
   /* Configure 2 layers w/ Blending */
-	LCD_Config();
-	HAL_TIM_Base_Start_IT(&htim6);
+  LCD_Config();
+  HAL_TIM_Base_Start_IT(&htim6);
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  //BSP_LCD_SelectLayer(0);
-//	  BSP_GYRO_GetXYZ(XYZ);
-//	  Xpos += (int)XYZ[1]/2500;
 	  Xpos += (int)X/2500;
 	  if(Xpos > BSP_LCD_GetXSize() - 20)
 		  Xpos = BSP_LCD_GetXSize() - 20;
@@ -206,12 +198,9 @@ int main(void)
 
 	  HAL_LTDC_Reload(&LtdcHandle,LTDC_SRCR_VBR);
 
-	  while(ReloadFlag == 0)
-	  {
-	          /* wait till reload takes effect (in the next vertical blanking period) */
-	  }
+	  while(ReloadFlag == 0)	{/* wait till reload takes effect (in the next vertical blanking period) */}
 //	  Delay
-	  HAL_Delay(50);
+//	  HAL_Delay(50);
 	  BSP_LCD_Clear(LCD_COLOR_BLACK);
 
     /* USER CODE END WHILE */
