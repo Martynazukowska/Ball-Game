@@ -64,6 +64,8 @@ LTDC_HandleTypeDef hltdc;
 
 SPI_HandleTypeDef hspi5;
 
+TIM_HandleTypeDef htim6;
+
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
@@ -83,6 +85,7 @@ static void MX_FMC_Init(void);
 static void MX_I2C3_Init(void);
 static void MX_LTDC_Init(void);
 static void MX_SPI5_Init(void);
+static void MX_TIM6_Init(void);
 /* USER CODE BEGIN PFP */
 void Draw_Obstacle(ObstacleDef *obs);
 static void LCD_Config(void);
@@ -124,8 +127,8 @@ int main(void)
   MX_FMC_Init();
   MX_I2C3_Init();
   MX_LTDC_Init();
-//  LCD_Config();
   MX_SPI5_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 
 
@@ -169,8 +172,7 @@ int main(void)
 
   /* Configure 2 layers w/ Blending */
 	LCD_Config();
-//    LTDC_LayerCfgTypeDef pLayerCfg;
-//    LTDC_LayerCfgTypeDef pLayerCfg1;
+
   while (1)
   {
 	  //BSP_LCD_SelectLayer(0);
@@ -362,133 +364,70 @@ static void MX_LTDC_Init(void)
 	ili9341_Init();
   /* USER CODE END LTDC_Init 0 */
 
-//  LTDC_LayerCfgTypeDef pLayerCfg = {0};
-//  LTDC_LayerCfgTypeDef pLayerCfg1 = {0};
+  LTDC_LayerCfgTypeDef pLayerCfg = {0};
+  LTDC_LayerCfgTypeDef pLayerCfg1 = {0};
 
   /* USER CODE BEGIN LTDC_Init 1 */
 
   /* USER CODE END LTDC_Init 1 */
-  LTDC_LayerCfgTypeDef pLayerCfg;
-      LTDC_LayerCfgTypeDef pLayerCfg1;
-
-      hltdc.Instance = LTDC;
-      hltdc.Init.HSPolarity = LTDC_HSPOLARITY_AL;
-      hltdc.Init.VSPolarity = LTDC_VSPOLARITY_AL;
-      hltdc.Init.DEPolarity = LTDC_DEPOLARITY_AL;
-      hltdc.Init.PCPolarity = LTDC_PCPOLARITY_IPC;
-      hltdc.Init.HorizontalSync = 7;
-      hltdc.Init.VerticalSync = 3;
-      hltdc.Init.AccumulatedHBP = 14;
-      hltdc.Init.AccumulatedVBP = 5;
-      hltdc.Init.AccumulatedActiveW = 334;
-      hltdc.Init.AccumulatedActiveH = 485;
-      hltdc.Init.TotalWidth = 340;
-      hltdc.Init.TotalHeigh = 487;
-      hltdc.Init.Backcolor.Blue = 0;
-      hltdc.Init.Backcolor.Green = 0;
-      hltdc.Init.Backcolor.Red = 0;
-      if (HAL_LTDC_Init(&hltdc) != HAL_OK)
-      {
-          Error_Handler();
-      }
-
-      pLayerCfg.WindowX0 = 0;
-      pLayerCfg.WindowX1 = 0;
-      pLayerCfg.WindowY0 = 0;
-      pLayerCfg.WindowY1 = 0;
-      pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_ARGB8888;
-      pLayerCfg.Alpha = 0;
-      pLayerCfg.Alpha0 = 0;
-      pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
-      pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-      pLayerCfg.FBStartAdress = 0xD0000300;
-      pLayerCfg.ImageWidth = 0;
-      pLayerCfg.ImageHeight = 0;
-      pLayerCfg.Backcolor.Blue = 0;
-      pLayerCfg.Backcolor.Green = 0;
-      pLayerCfg.Backcolor.Red = 0;
-      if (HAL_LTDC_ConfigLayer(&hltdc, &pLayerCfg, 0) != HAL_OK)
-      {
-          Error_Handler();
-      }
-
-      pLayerCfg1.WindowX0 = 0;
-      pLayerCfg1.WindowX1 = 0;
-      pLayerCfg1.WindowY0 = 0;
-      pLayerCfg1.WindowY1 = 0;
-      pLayerCfg1.PixelFormat = LTDC_PIXEL_FORMAT_ARGB8888;
-      pLayerCfg1.Alpha = 0;
-      pLayerCfg1.Alpha0 = 0;
-      pLayerCfg1.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
-      pLayerCfg1.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-      pLayerCfg1.FBStartAdress = 0xD0050000;
-      pLayerCfg1.ImageWidth = 0;
-      pLayerCfg1.ImageHeight = 0;
-      pLayerCfg1.Backcolor.Blue = 0;
-      pLayerCfg1.Backcolor.Green = 0;
-      pLayerCfg1.Backcolor.Red = 0;
-      if (HAL_LTDC_ConfigLayer(&hltdc, &pLayerCfg1, 1) != HAL_OK)
-      {
-          Error_Handler();
-      }
-//  hltdc.Instance = LTDC;
-//  hltdc.Init.HSPolarity = LTDC_HSPOLARITY_AL;
-//  hltdc.Init.VSPolarity = LTDC_VSPOLARITY_AL;
-//  hltdc.Init.DEPolarity = LTDC_DEPOLARITY_AL;
-//  hltdc.Init.PCPolarity = LTDC_PCPOLARITY_IPC;
-//  hltdc.Init.HorizontalSync = 9;
-//  hltdc.Init.VerticalSync = 1;
-//  hltdc.Init.AccumulatedHBP = 29;
-//  hltdc.Init.AccumulatedVBP = 3;
-//  hltdc.Init.AccumulatedActiveW = 269;
-//  hltdc.Init.AccumulatedActiveH = 323;
-//  hltdc.Init.TotalWidth = 279;
-//  hltdc.Init.TotalHeigh = 327;
-//  hltdc.Init.Backcolor.Blue = 0;
-//  hltdc.Init.Backcolor.Green = 0;
-//  hltdc.Init.Backcolor.Red = 0;
-//  if (HAL_LTDC_Init(&hltdc) != HAL_OK)
-//  {
-//    Error_Handler();
-//  }
-//  pLayerCfg.WindowX0 = 0;
-//  pLayerCfg.WindowX1 = 240;
-//  pLayerCfg.WindowY0 = 0;
-//  pLayerCfg.WindowY1 = 320;
-//  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
-//  pLayerCfg.Alpha = 0;
-//  pLayerCfg.Alpha0 = 0;
-//  pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
-//  pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-//  pLayerCfg.FBStartAdress = FRAME_BUFFER_DEAFULT;
-//  pLayerCfg.ImageWidth = 0;
-//  pLayerCfg.ImageHeight = 0;
-//  pLayerCfg.Backcolor.Blue = 0;
-//  pLayerCfg.Backcolor.Green = 0;
-//  pLayerCfg.Backcolor.Red = 0;
-//  if (HAL_LTDC_ConfigLayer(&hltdc, &pLayerCfg, 0) != HAL_OK)
-//  {
-//    Error_Handler();
-//  }
-//  pLayerCfg1.WindowX0 = 0;
-//  pLayerCfg1.WindowX1 = 240;
-//  pLayerCfg1.WindowY0 = 0;
-//  pLayerCfg1.WindowY1 = 320;
-//  pLayerCfg1.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
-//  pLayerCfg1.Alpha = 0;
-//  pLayerCfg1.Alpha0 = 0;
-//  pLayerCfg1.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
-//  pLayerCfg1.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-//  pLayerCfg1.FBStartAdress = 0;
-//  pLayerCfg1.ImageWidth = 0;
-//  pLayerCfg1.ImageHeight = 0;
-//  pLayerCfg1.Backcolor.Blue = 0;
-//  pLayerCfg1.Backcolor.Green = 0;
-//  pLayerCfg1.Backcolor.Red = 0;
-//  if (HAL_LTDC_ConfigLayer(&hltdc, &pLayerCfg1, 1) != HAL_OK)
-//  {
-//    Error_Handler();
-//  }
+  hltdc.Instance = LTDC;
+  hltdc.Init.HSPolarity = LTDC_HSPOLARITY_AL;
+  hltdc.Init.VSPolarity = LTDC_VSPOLARITY_AL;
+  hltdc.Init.DEPolarity = LTDC_DEPOLARITY_AL;
+  hltdc.Init.PCPolarity = LTDC_PCPOLARITY_IPC;
+  hltdc.Init.HorizontalSync = 9;
+  hltdc.Init.VerticalSync = 1;
+  hltdc.Init.AccumulatedHBP = 29;
+  hltdc.Init.AccumulatedVBP = 3;
+  hltdc.Init.AccumulatedActiveW = 269;
+  hltdc.Init.AccumulatedActiveH = 323;
+  hltdc.Init.TotalWidth = 279;
+  hltdc.Init.TotalHeigh = 327;
+  hltdc.Init.Backcolor.Blue = 0;
+  hltdc.Init.Backcolor.Green = 0;
+  hltdc.Init.Backcolor.Red = 0;
+  if (HAL_LTDC_Init(&hltdc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  pLayerCfg.WindowX0 = 0;
+  pLayerCfg.WindowX1 = 240;
+  pLayerCfg.WindowY0 = 0;
+  pLayerCfg.WindowY1 = 320;
+  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
+  pLayerCfg.Alpha = 0;
+  pLayerCfg.Alpha0 = 0;
+  pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
+  pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
+  pLayerCfg.FBStartAdress = FRAME_BUFFER_DEAFULT;
+  pLayerCfg.ImageWidth = 0;
+  pLayerCfg.ImageHeight = 0;
+  pLayerCfg.Backcolor.Blue = 0;
+  pLayerCfg.Backcolor.Green = 0;
+  pLayerCfg.Backcolor.Red = 0;
+  if (HAL_LTDC_ConfigLayer(&hltdc, &pLayerCfg, 0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  pLayerCfg1.WindowX0 = 0;
+  pLayerCfg1.WindowX1 = 240;
+  pLayerCfg1.WindowY0 = 0;
+  pLayerCfg1.WindowY1 = 320;
+  pLayerCfg1.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
+  pLayerCfg1.Alpha = 0;
+  pLayerCfg1.Alpha0 = 0;
+  pLayerCfg1.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
+  pLayerCfg1.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
+  pLayerCfg1.FBStartAdress = 0;
+  pLayerCfg1.ImageWidth = 0;
+  pLayerCfg1.ImageHeight = 0;
+  pLayerCfg1.Backcolor.Blue = 0;
+  pLayerCfg1.Backcolor.Green = 0;
+  pLayerCfg1.Backcolor.Red = 0;
+  if (HAL_LTDC_ConfigLayer(&hltdc, &pLayerCfg1, 1) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /* USER CODE BEGIN LTDC_Init 2 */
 
   /* USER CODE END LTDC_Init 2 */
@@ -530,6 +469,44 @@ static void MX_SPI5_Init(void)
   /* USER CODE BEGIN SPI5_Init 2 */
 
   /* USER CODE END SPI5_Init 2 */
+
+}
+
+/**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM6_Init(void)
+{
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 18000-1;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 1000-1;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM6_Init 2 */
+
+  /* USER CODE END TIM6_Init 2 */
 
 }
 
