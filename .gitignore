@@ -1,5 +1,5 @@
-Debug/
-Release/
-.gigitgnore
+Debug/*
+Release/*
+.gitignore
 'Ball-Game Debug.launch'
 Ball-Game Debug.launch
