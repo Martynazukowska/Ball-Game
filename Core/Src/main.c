@@ -73,7 +73,7 @@ GYRO_DrvTypeDef gyroscope;
 LTDC_HandleTypeDef LtdcHandle;
 
 __IO uint32_t ReloadFlag = 0;
-
+__IO float X = 0;
 
 /* USER CODE END PV */
 
@@ -162,7 +162,7 @@ int main(void)
 
   BSP_GYRO_Reset();
 
-  float XYZ[3] = {0x00, 0x00, 0x00};
+//  float XYZ[3] = {0x00, 0x00, 0x00};
 
   int Xpos = BSP_LCD_GetXSize()/2;
   int Ypos = 60;
@@ -172,12 +172,13 @@ int main(void)
 
   /* Configure 2 layers w/ Blending */
 	LCD_Config();
-
+	HAL_TIM_Base_Start_IT(&htim6);
   while (1)
   {
 	  //BSP_LCD_SelectLayer(0);
-	  BSP_GYRO_GetXYZ(XYZ);
-	  Xpos += (int)XYZ[1]/2500;
+//	  BSP_GYRO_GetXYZ(XYZ);
+//	  Xpos += (int)XYZ[1]/2500;
+	  Xpos += (int)X/2500;
 	  if(Xpos > BSP_LCD_GetXSize() - 20)
 		  Xpos = BSP_LCD_GetXSize() - 20;
 	  else if(Xpos <20)
@@ -843,6 +844,15 @@ void HAL_LTDC_ReloadEventCallback(LTDC_HandleTypeDef *hltdc)
 	ReloadFlag = 1;
 }
 
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if(htim == &htim6)
+	{
+		float XYZ[3];
+		BSP_GYRO_GetXYZ(XYZ);
+		X = XYZ[1];
+	}
+}
 /* USER CODE END 4 */
 
 /**
