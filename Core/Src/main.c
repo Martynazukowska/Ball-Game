@@ -49,7 +49,7 @@ typedef struct
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define ALPHA 0.60f
+#define ALPHA 0.95f
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -174,7 +174,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  Xpos += X * 0.07 * 0.0008;
+	  Xpos += X ;
 	  if(Xpos > BSP_LCD_GetXSize() - 20)
 		  Xpos = BSP_LCD_GetXSize() - 20;
 	  else if(Xpos <20)
@@ -842,7 +842,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		float XYZ[3];
 		BSP_GYRO_GetXYZ(XYZ);
-		X = FirstOrderIIR_Update(&filter, XYZ[1]);
+		X = FirstOrderIIR_Update(&filter, XYZ[1]* 0.07 * 0.0008);
 	}
 }
 /* USER CODE END 4 */
