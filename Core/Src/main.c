@@ -26,6 +26,7 @@
 #include "l3gd20.h"
 #include "stm32f429i_discovery_gyroscope.h"
 #include "FirstOrderIIR.h"
+#include "Velocity.h"
 //#include "st_logo1.h"
 //#include "st_logo2.h"
 //#include "Rectangle_2.h"
@@ -49,7 +50,10 @@ typedef struct
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define ALPHA 0.95f
+#define ALPHA 0.775f
+#define BETA 0.890f
+//#define ALPHA 0.506
+//#define BETA 0.75279f
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -76,9 +80,9 @@ LTDC_HandleTypeDef LtdcHandle;
 
 __IO uint32_t ReloadFlag = 0;
 __IO float X = 0;
-
+__IO int gyro_flag = 0;
 FirstOrderIIR_t filter;
-
+Velocity_t velocity;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -115,7 +119,8 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  FirstOrderIIR_Init(&filter, ALPHA);
+  FirstOrderIIR_Init(&filter, ALPHA, BETA);
+  VelocityStructure_Init(&velocity);
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -174,12 +179,17 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  Xpos += X ;
+	  if(gyro_flag == 1)
+	  {
+		  gyro_flag = 0;
+//		  Xpos += VelocityStructure_Update(&velocity, X);
+		  Xpos += X;
+	  }
 	  if(Xpos > BSP_LCD_GetXSize() - 20)
 		  Xpos = BSP_LCD_GetXSize() - 20;
 	  else if(Xpos <20)
 		  Xpos = 20;
-//	  Background Layer To razej do jakiejś zmiany, żeby nie pisać pozycji dla każdej przeszkody
+//	  Background Layer To raczej do jakiejś zmiany, żeby nie pisać pozycji dla każdej przeszkody
 	  Draw_Obstacle(&Obs_Left);
 	  Obs_Left.Ypos -= 1;
 	  if(Obs_Left.Ypos <= 30)
@@ -842,6 +852,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		float XYZ[3];
 		BSP_GYRO_GetXYZ(XYZ);
+		gyro_flag = 1;
 		X = FirstOrderIIR_Update(&filter, XYZ[1]* 0.07 * 0.0008);
 	}
 }
