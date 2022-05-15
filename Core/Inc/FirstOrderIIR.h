@@ -11,12 +11,13 @@
 typedef struct
 {
 	float alpha;
+	float beta;
 
 	float out;
 	float previous_in;
 }FirstOrderIIR_t;
 
-int FirstOrderIIR_Init(FirstOrderIIR_t *filter, float alpha);
+int FirstOrderIIR_Init(FirstOrderIIR_t *filter, float alpha, float beta);
 
 float FirstOrderIIR_Update(FirstOrderIIR_t *filter, float in);
 

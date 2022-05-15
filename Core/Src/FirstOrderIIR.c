@@ -7,12 +7,13 @@
 
 #include "FirstOrderIIR.h"
 
-int FirstOrderIIR_Init(FirstOrderIIR_t *filter, float alpha)
+int FirstOrderIIR_Init(FirstOrderIIR_t *filter, float alpha, float beta)
 {
 	if(alpha > 1.0f || alpha < 0.0f)
 		return -1;
 
 	filter->alpha = alpha;
+	filter->beta = beta;
 	filter->out = 0.0f;
 	filter->previous_in = 0.0f;
 
@@ -21,7 +22,7 @@ int FirstOrderIIR_Init(FirstOrderIIR_t *filter, float alpha)
 
 float FirstOrderIIR_Update(FirstOrderIIR_t *filter, float in)
 {
-	filter->out = filter->alpha * (in - filter->previous_in + filter->out);
+	filter->out = filter->alpha * filter->out + filter->beta * (in - filter->previous_in);
 	filter->previous_in = in;
 
 	return filter->out;
