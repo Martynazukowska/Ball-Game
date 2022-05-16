@@ -47,7 +47,7 @@
 #define DPS_SCALE_500 0.01750f
 #define DPS_SCALE_2000 0.070f
 #define DPS_SCALE_USER 0.0008f
-#define OBSTACLES_NUMBER 2
+#define OBSTACLES_NUMBER 4
 //#define BETA 0.75279f
 /* USER CODE END PD */
 
@@ -166,8 +166,10 @@ int main(void)
   float Xpos = BSP_LCD_GetXSize()/2;
   int Ypos = 60;
 
-  Obstacle_Init(&obstacles[0], 0, BSP_LCD_GetYSize()-30, 150, 30);
-  Obstacle_Init(&obstacles[1], BSP_LCD_GetXSize()-100, BSP_LCD_GetYSize()-30, 100, 30);
+  Obstacle_Init(&obstacles[0], 0, BSP_LCD_GetYSize() - 30, 95, 30);
+  Obstacle_Init(&obstacles[1], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() - 30, 95, 30);
+  Obstacle_Init(&obstacles[2], 0, BSP_LCD_GetYSize() + 60, 95, 30);
+  Obstacle_Init(&obstacles[3], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 60, 95, 30);
 
   /* Configure 2 layers w/ Blending */
   LCD_Config();
@@ -182,12 +184,12 @@ int main(void)
 	  {
 		  gyro_flag = 0;
 		  Xpos += X;
-	  }
 
-	  if(Xpos > BSP_LCD_GetXSize() - 20)
-		  Xpos = BSP_LCD_GetXSize() - 20;
-	  else if(Xpos <20)
-		  Xpos = 20;
+		  if(Xpos > BSP_LCD_GetXSize() - 20)
+			  Xpos = BSP_LCD_GetXSize() - 20;
+		  else if(Xpos <20)
+			  Xpos = 20;
+	  }
 
 //	  SingleObstacle_Move(&obstacles[0], 0, -1);
 //	  SingleObstacle_Move(&obstacles[1], 0, -1);
@@ -855,8 +857,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 		BSP_GYRO_GetXYZ(XYZ);
 
-		X = FirstOrderIIR_Update(&filter, XYZ[1]);
-		X = VelocityStructure_Update(&velocity, X * DPS_SCALE_2000) * DPS_SCALE_USER;
+		X = FirstOrderIIR_Update(&filter, XYZ[1]) * DPS_SCALE_2000 * DPS_SCALE_USER;
+//		X = FirstOrderIIR_Update(&filter, XYZ[1]);
+//		X = VelocityStructure_Update(&velocity, X * DPS_SCALE_2000) * DPS_SCALE_USER;
 
 	}
 }

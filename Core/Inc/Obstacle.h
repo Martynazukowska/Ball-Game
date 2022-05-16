@@ -23,15 +23,15 @@ typedef struct
 	uint16_t Height;
 }ObstacleDef;
 
-void Obstacle_Init(ObstacleDef *obstacle, uint16_t X, uint16_t Y, uint16_t width, uint16_t height);
+void Obstacle_Init(ObstacleDef *obstacle, int16_t X, int16_t Y, uint16_t width, uint16_t height);
 
 void Obstacle_Overflow(ObstacleDef *obstacle, uint8_t NumberOfObjects);
 
 void Obstacle_OverflowNew(ObstacleDef *obstacle, uint8_t NumberOfObjects);
 
-void SingleObstacle_Move(ObstacleDef *obstacle, int X, int Y);
+void SingleObstacle_Move(ObstacleDef *obstacle, int16_t X, int16_t Y);
 
-void MultiObstacle_Move(ObstacleDef *obstacle, uint8_t NumberOfObjects, int X, int Y);
+void MultiObstacle_Move(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X, int16_t Y);
 
 int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects);
 
