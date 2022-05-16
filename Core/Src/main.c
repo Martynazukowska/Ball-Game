@@ -27,6 +27,7 @@
 #include "stm32f429i_discovery_gyroscope.h"
 #include "FirstOrderIIR.h"
 #include "Velocity.h"
+#include "Obstacle.h"
 //#include "st_logo1.h"
 //#include "st_logo2.h"
 //#include "Rectangle_2.h"
@@ -35,17 +36,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-/**
- * @brief struct of an obstacle
- * @det has X, Y beginnig positions, width and height
- */
-typedef struct
-{
-	uint16_t Xpos;
-	uint16_t Ypos;
-	uint16_t Width;
-	uint16_t Height;
-}ObstacleDef;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -56,6 +47,7 @@ typedef struct
 #define DPS_SCALE_500 0.01750f
 #define DPS_SCALE_2000 0.070f
 #define DPS_SCALE_USER 0.0008f
+#define OBSTACLES_NUMBER 8
 //#define BETA 0.75279f
 /* USER CODE END PD */
 
@@ -78,6 +70,7 @@ TIM_HandleTypeDef htim6;
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
+
 GYRO_DrvTypeDef gyroscope;
 LTDC_HandleTypeDef LtdcHandle;
 
@@ -86,6 +79,7 @@ __IO float X = 0;
 __IO int gyro_flag = 0;
 FirstOrderIIR_t filter;
 Velocity_t velocity;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -98,7 +92,6 @@ static void MX_LTDC_Init(void);
 static void MX_SPI5_Init(void);
 static void MX_TIM6_Init(void);
 /* USER CODE BEGIN PFP */
-void Draw_Obstacle(ObstacleDef *obs);
 static void LCD_Config(void);
 /* USER CODE END PFP */
 
@@ -114,6 +107,7 @@ static void LCD_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+	ObstacleDef obstacles[OBSTACLES_NUMBER];
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -124,6 +118,7 @@ int main(void)
   /* USER CODE BEGIN Init */
   FirstOrderIIR_Init(&filter, ALPHA, BETA);
   VelocityStructure_Init(&velocity);
+  srand(time(NULL));
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -170,11 +165,17 @@ int main(void)
   float Xpos = BSP_LCD_GetXSize()/2;
   int Ypos = 60;
 
-  ObstacleDef Obs_Left = {0, BSP_LCD_GetYSize()-30, 60, 30};
-  ObstacleDef Obs_Right = {BSP_LCD_GetXSize()-100, BSP_LCD_GetYSize()-60, 100, 30};
+  Obstacle_Init(&obstacles[0], 0, BSP_LCD_GetYSize()-30, 95, 30);
+  Obstacle_Init(&obstacles[1], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize()-30, 95, 30);
+  Obstacle_Init(&obstacles[2], 0, BSP_LCD_GetYSize() + 80, 95, 30);
+  Obstacle_Init(&obstacles[3], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 80, 95, 30);
+  Obstacle_Init(&obstacles[4], 0, BSP_LCD_GetYSize() + 140, 110, 30);
+  Obstacle_Init(&obstacles[5], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 140, 95, 30);
+  Obstacle_Init(&obstacles[6], 0, BSP_LCD_GetYSize() + 210, 30, 30);
+  Obstacle_Init(&obstacles[7], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 210, 95, 30);
 
   /* Configure 2 layers w/ Blending */
-  LCD_Config();
+  LCD_Config();	//bez niej nie ma przerwania dla wyświetlania
   HAL_TIM_Base_Start_IT(&htim6);
   /* USER CODE END 2 */
 
@@ -186,21 +187,18 @@ int main(void)
 	  {
 		  gyro_flag = 0;
 		  Xpos += X;
+
+		  if(Xpos > BSP_LCD_GetXSize() - 20)
+			  Xpos = BSP_LCD_GetXSize() - 20;
+		  else if(Xpos <20)
+			  Xpos = 20;
 	  }
 
-	  if(Xpos > BSP_LCD_GetXSize() - 20)
-		  Xpos = BSP_LCD_GetXSize() - 20;
-	  else if(Xpos <20)
-		  Xpos = 20;
-//	  Background Layer To raczej do jakiejś zmiany, żeby nie pisać pozycji dla każdej przeszkody
-	  Draw_Obstacle(&Obs_Left);
-	  Obs_Left.Ypos -= 1;
-	  if(Obs_Left.Ypos <= 30)
-		  Obs_Left.Ypos = BSP_LCD_GetYSize()-30;
-	  Draw_Obstacle(&Obs_Right);
-	  Obs_Right.Ypos -= 1;
-	  if(Obs_Right.Ypos <= 30)
-		  Obs_Right.Ypos = BSP_LCD_GetYSize()-30;
+
+	  Obstacle_OverflowNew(obstacles, OBSTACLES_NUMBER);
+
+	  MultiObstacle_Move(obstacles, OBSTACLES_NUMBER, 0, -1);
+	  MultiObstacle_Draw(obstacles, OBSTACLES_NUMBER);
 
 //	  Foreground Layer
 	  BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
@@ -424,7 +422,7 @@ static void MX_LTDC_Init(void)
   pLayerCfg1.Alpha0 = 0;
   pLayerCfg1.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
   pLayerCfg1.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-  pLayerCfg1.FBStartAdress = 0;
+  pLayerCfg1.FBStartAdress = 0xD0050000;
   pLayerCfg1.ImageWidth = 0;
   pLayerCfg1.ImageHeight = 0;
   pLayerCfg1.Backcolor.Blue = 0;
@@ -755,7 +753,7 @@ static void LCD_Config(void)
 
   /* Pixel Format configuration*/
 
- // pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
+//  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
   pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_ARGB8888;
   /* Start Address configuration : frame buffer is located at FLASH memory */
   //pLayerCfg.FBStartAdress = (uint32_t)&ST_LOGO_1;
@@ -787,11 +785,11 @@ static void LCD_Config(void)
   pLayerCfg1.WindowY1 = BSP_LCD_GetYSize();
 
   /* Pixel Format configuration*/
-  //pLayerCfg1.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
-  pLayerCfg.PixelFormat =LTDC_PIXEL_FORMAT_ARGB8888;
+//  pLayerCfg1.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
+  pLayerCfg1.PixelFormat =LTDC_PIXEL_FORMAT_ARGB8888;
   /* Start Address configuration : frame buffer is located at FLASH memory */
  // pLayerCfg1.FBStartAdress = (uint32_t)&ST_LOGO_2;
-  pLayerCfg1.FBStartAdress =0xD0050000;
+  pLayerCfg1.FBStartAdress =0xD0000000;
 
   /* Alpha constant (255 totally opaque) */
   pLayerCfg1.Alpha = 200;
@@ -832,12 +830,6 @@ static void LCD_Config(void)
   }
 }
 
-void Draw_Obstacle(ObstacleDef *obs)
-{
-	BSP_LCD_SetTextColor(LCD_COLOR_BROWN);
-	BSP_LCD_FillRect(obs->Xpos, obs->Ypos, obs->Width, obs->Height);
-}
-
 /**
   * @brief  Reload Event callback.
   * @param  hltdc: pointer to a LTDC_HandleTypeDef structure that contains
@@ -858,8 +850,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 		BSP_GYRO_GetXYZ(XYZ);
 
-		X = FirstOrderIIR_Update(&filter, XYZ[1]);
-		X = VelocityStructure_Update(&velocity, X * DPS_SCALE_2000) * DPS_SCALE_USER;
+		X = FirstOrderIIR_Update(&filter, XYZ[1]) * DPS_SCALE_2000 * DPS_SCALE_USER;
+//		X = FirstOrderIIR_Update(&filter, XYZ[1]);
+//		X = VelocityStructure_Update(&velocity, X * DPS_SCALE_2000) * DPS_SCALE_USER;
 
 	}
 }
