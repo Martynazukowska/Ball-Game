@@ -41,12 +41,14 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define ALPHA 0.775f
-#define BETA 0.890f
+//#define ALPHA 0.043213918263772265
+#define ALPHA 0.01229909354281272
+#define BETA_0 (1+ALPHA)/2
+#define BETA_1 -(1+ALPHA)/2
 #define DPS_SCALE_250 0.00875f
 #define DPS_SCALE_500 0.01750f
 #define DPS_SCALE_2000 0.070f
-#define DPS_SCALE_USER 0.0008f
+#define DPS_SCALE_USER 0.00095f
 #define OBSTACLES_NUMBER 8
 //#define BETA 0.75279f
 /* USER CODE END PD */
@@ -116,7 +118,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  FirstOrderIIR_Init(&filter, ALPHA, BETA);
+  FirstOrderIIR_Init(&filter, ALPHA, BETA_0, BETA_1);
   VelocityStructure_Init(&velocity);
   srand(time(NULL));
   /* USER CODE END Init */
