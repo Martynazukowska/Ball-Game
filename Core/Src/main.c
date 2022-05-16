@@ -55,7 +55,7 @@ typedef struct
 #define DPS_SCALE_250 0.00875f
 #define DPS_SCALE_500 0.01750f
 #define DPS_SCALE_2000 0.070f
-#define DPS_SCALE_USER 0.001f
+#define DPS_SCALE_USER 0.0008f
 //#define BETA 0.75279f
 /* USER CODE END PD */
 
@@ -185,11 +185,9 @@ int main(void)
 	  if(gyro_flag == 1)
 	  {
 		  gyro_flag = 0;
-//		  float tmp = (X_previous - X) * DPS_SCALE_2000;
-		  Xpos += VelocityStructure_Update(&velocity, X * DPS_SCALE_2000) * DPS_SCALE_USER;
-//		  Xpos += X * DPS_SCALE_2000 * 0.0008;
-
+		  Xpos += X;
 	  }
+
 	  if(Xpos > BSP_LCD_GetXSize() - 20)
 		  Xpos = BSP_LCD_GetXSize() - 20;
 	  else if(Xpos <20)
@@ -861,6 +859,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		BSP_GYRO_GetXYZ(XYZ);
 
 		X = FirstOrderIIR_Update(&filter, XYZ[1]);
+		X = VelocityStructure_Update(&velocity, X * DPS_SCALE_2000) * DPS_SCALE_USER;
+
 	}
 }
 /* USER CODE END 4 */
