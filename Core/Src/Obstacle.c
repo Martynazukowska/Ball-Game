@@ -24,7 +24,7 @@ void Obstacle_Overflow(ObstacleDef *obstacle, uint8_t NumberOfObjects)
 {
 	for(uint8_t i = 0; i < NumberOfObjects; ++i)
 	{
-		if(obstacle[i].Ypos + obstacle[i].Height <= 0)
+		if(obstacle[i].Ypos <= 0)
 			obstacle[i].Ypos = BSP_LCD_GetYSize() - obstacle[i].Height;
 	}
 }

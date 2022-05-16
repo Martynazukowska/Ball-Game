@@ -205,6 +205,8 @@ int main(void)
 //	  SingleObstacle_Draw(&obstacles[0]);
 //	  SingleObstacle_Draw(&obstacles[1]);
 
+	  Obstacle_Overflow(obstacles, OBSTACLES_NUMBER);
+
 	  MultiObstacle_Move(obstacles, OBSTACLES_NUMBER, 0, -1);
 	  MultiObstacle_Draw(obstacles, OBSTACLES_NUMBER);
 
