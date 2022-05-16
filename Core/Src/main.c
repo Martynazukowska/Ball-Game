@@ -108,7 +108,6 @@ static void LCD_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-//	ObstacleDef *obstacles = (ObstacleDef*)malloc(OBSTACLES_NUMBER * sizeof(ObstacleDef));
 	ObstacleDef obstacles[OBSTACLES_NUMBER];
   /* USER CODE END 1 */
 
@@ -120,6 +119,7 @@ int main(void)
   /* USER CODE BEGIN Init */
   FirstOrderIIR_Init(&filter, ALPHA, BETA);
   VelocityStructure_Init(&velocity);
+  srand(time(NULL));
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -166,10 +166,8 @@ int main(void)
   float Xpos = BSP_LCD_GetXSize()/2;
   int Ypos = 60;
 
-//  ObstacleDef Obs_Left = {0, BSP_LCD_GetYSize()-30, 60, 30};
-//  ObstacleDef Obs_Right = {BSP_LCD_GetXSize()-100, BSP_LCD_GetYSize()-60, 100, 30};
-  Obstacle_Init(&obstacles[0], 0, BSP_LCD_GetYSize()-30, 60, 30);
-  Obstacle_Init(&obstacles[1], BSP_LCD_GetXSize()-100, BSP_LCD_GetYSize()-60, 100, 30);
+  Obstacle_Init(&obstacles[0], 0, BSP_LCD_GetYSize()-30, 150, 30);
+  Obstacle_Init(&obstacles[1], BSP_LCD_GetXSize()-100, BSP_LCD_GetYSize()-30, 100, 30);
 
   /* Configure 2 layers w/ Blending */
   LCD_Config();
@@ -190,22 +188,13 @@ int main(void)
 		  Xpos = BSP_LCD_GetXSize() - 20;
 	  else if(Xpos <20)
 		  Xpos = 20;
-//	  Background Layer To raczej do jakiejś zmiany, żeby nie pisać pozycji dla każdej przeszkody
-//	  Draw_Obstacle(&Obs_Left);
-//	  Obs_Left.Ypos -= 1;
-//	  if(Obs_Left.Ypos <= 30)
-//		  Obs_Left.Ypos = BSP_LCD_GetYSize()-30;
-//	  Draw_Obstacle(&Obs_Right);
-//	  Obs_Right.Ypos -= 1;
-//	  if(Obs_Right.Ypos <= 30)
-//		  Obs_Right.Ypos = BSP_LCD_GetYSize()-30;
 
 //	  SingleObstacle_Move(&obstacles[0], 0, -1);
 //	  SingleObstacle_Move(&obstacles[1], 0, -1);
 //	  SingleObstacle_Draw(&obstacles[0]);
 //	  SingleObstacle_Draw(&obstacles[1]);
 
-	  Obstacle_Overflow(obstacles, OBSTACLES_NUMBER);
+	  Obstacle_OverflowNew(obstacles, OBSTACLES_NUMBER);
 
 	  MultiObstacle_Move(obstacles, OBSTACLES_NUMBER, 0, -1);
 	  MultiObstacle_Draw(obstacles, OBSTACLES_NUMBER);

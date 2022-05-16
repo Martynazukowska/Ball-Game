@@ -29,10 +29,30 @@ void Obstacle_Overflow(ObstacleDef *obstacle, uint8_t NumberOfObjects)
 	}
 }
 
+void Obstacle_OverflowNew(ObstacleDef *obstacle, uint8_t NumberOfObjects)
+{
+	uint16_t diff;
+	for(uint8_t i = 0; i < NumberOfObjects; ++i)
+	{
+		if(obstacle[i].Ypos <= 0)
+		{
+			obstacle[i].Ypos = BSP_LCD_GetYSize() - obstacle[i].Height;
+			if(i % 2 == 0)
+			{
+				diff = (rand() % 80) + 20;
+				Obstacle_Init(&obstacle[i], 0, obstacle[i].Ypos, diff, obstacle[i].Height);
+			}
+			else
+			{
+				diff = (rand() % 80) + 20;
+				Obstacle_Init(&obstacle[i], BSP_LCD_GetXSize() - diff, obstacle[i].Ypos, diff, obstacle[i].Height);
+			}
+		}
+	}
+}
+
 void SingleObstacle_Move(ObstacleDef *obstacle, int X, int Y)
 {
-//	if(obstacle->Xpos + X > BSP_LCD_GetXSize() || obstacle->Ypos + Y > BSP_LCD_GetYSize())
-//		return;
 	obstacle->Xpos += X;
 	obstacle->Ypos += Y;
 }

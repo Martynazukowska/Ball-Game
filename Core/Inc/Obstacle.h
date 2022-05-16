@@ -5,6 +5,7 @@
  *      Author: Dawid Łukasiewicz
  */
 #include <stdlib.h>
+#include <time.h>
 #include "stm32f429i_discovery_lcd.h"
 
 #ifndef INC_OBSTACLE_H_
