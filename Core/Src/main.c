@@ -79,7 +79,7 @@ __IO int gyro_flag = 0;
 FirstOrderIIR_t filter;
 Velocity_t velocity;
 
-ObstacleDef *obstacles[OBSTACLES_NUMBER];
+//ObstacleDef obstacles_0
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -108,6 +108,8 @@ static void LCD_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+//	ObstacleDef *obstacles = (ObstacleDef*)malloc(OBSTACLES_NUMBER * sizeof(ObstacleDef));
+	ObstacleDef obstacles[OBSTACLES_NUMBER];
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -166,8 +168,8 @@ int main(void)
 
 //  ObstacleDef Obs_Left = {0, BSP_LCD_GetYSize()-30, 60, 30};
 //  ObstacleDef Obs_Right = {BSP_LCD_GetXSize()-100, BSP_LCD_GetYSize()-60, 100, 30};
-  Obstacle_Init(obstacles[0], 0, BSP_LCD_GetYSize()-30, 60, 30);
-  Obstacle_Init(obstacles[1], BSP_LCD_GetXSize()-100, BSP_LCD_GetYSize()-60, 100, 30);
+  Obstacle_Init(&obstacles[0], 0, BSP_LCD_GetYSize()-30, 60, 30);
+  Obstacle_Init(&obstacles[1], BSP_LCD_GetXSize()-100, BSP_LCD_GetYSize()-60, 100, 30);
 
   /* Configure 2 layers w/ Blending */
   LCD_Config();
@@ -198,10 +200,13 @@ int main(void)
 //	  if(Obs_Right.Ypos <= 30)
 //		  Obs_Right.Ypos = BSP_LCD_GetYSize()-30;
 
-	  SingleObstacle_Move(obstacles[0], 0, -1);
-	  SingleObstacle_Move(obstacles[1], 0, -1);
-	  SingleObstacle_Draw(obstacles[0]);
-	  SingleObstacle_Draw(obstacles[1]);
+//	  SingleObstacle_Move(&obstacles[0], 0, -1);
+//	  SingleObstacle_Move(&obstacles[1], 0, -1);
+//	  SingleObstacle_Draw(&obstacles[0]);
+//	  SingleObstacle_Draw(&obstacles[1]);
+
+	  MultiObstacle_Move(obstacles, OBSTACLES_NUMBER, 0, -1);
+	  MultiObstacle_Draw(obstacles, OBSTACLES_NUMBER);
 
 //	  Foreground Layer
 	  BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);

@@ -20,6 +20,15 @@ void Obstacle_Init(ObstacleDef *obstacle, uint16_t X, uint16_t Y, uint16_t width
 	obstacle->Height = height;
 }
 
+void Obstacle_Overflow(ObstacleDef *obstacle, uint8_t NumberOfObjects)
+{
+	for(uint8_t i = 0; i < NumberOfObjects; ++i)
+	{
+		if(obstacle[i].Ypos + obstacle[i].Height <= 0)
+			obstacle[i].Ypos = BSP_LCD_GetYSize() - obstacle[i].Height;
+	}
+}
+
 void SingleObstacle_Move(ObstacleDef *obstacle, int X, int Y)
 {
 //	if(obstacle->Xpos + X > BSP_LCD_GetXSize() || obstacle->Ypos + Y > BSP_LCD_GetYSize())
@@ -28,18 +37,15 @@ void SingleObstacle_Move(ObstacleDef *obstacle, int X, int Y)
 	obstacle->Ypos += Y;
 }
 
-void MultiObstacle_Move(ObstacleDef **obstacle, uint8_t NumberOfObjects, int X, int Y)
+void MultiObstacle_Move(ObstacleDef *obstacle, uint8_t NumberOfObjects, int X, int Y)
 {
-
-//	uint8_t NumberOfObjects = sizeof(obstacle)/sizeof(*obstacle);	//Only if declare the array of obstacles statically
 	for(uint8_t i = 0; i < NumberOfObjects; ++i)
 	{
-		obstacle[i]->Xpos += X;
-		obstacle[i]->Ypos += Y;
+		SingleObstacle_Move(&obstacle[i], X, Y);
 	}
 }
 
-int IfCollisionDetect(ObstacleDef **obstacle, uint8_t NumberOfObjects)
+int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects)
 {
 	return 0;
 }
@@ -50,13 +56,12 @@ void SingleObstacle_Draw(ObstacleDef *obstacle)
 	BSP_LCD_FillRect(obstacle->Xpos, obstacle->Ypos, obstacle->Width, obstacle->Height);
 }
 
-void MultiObstacle_Draw(ObstacleDef **obstacle, uint8_t NumberOfObjects)
+void MultiObstacle_Draw(ObstacleDef *obstacle, uint8_t NumberOfObjects)
 {
 	BSP_LCD_SetTextColor(LCD_COLOR_BROWN);
 
-//	uint8_t NumberOfObjects = sizeof(obstacle)/sizeof(*obstacle);	//Only if declare the array of obstacles statically
 	for(uint8_t i = 0; i < NumberOfObjects; ++i)
 	{
-		BSP_LCD_FillRect(obstacle[i]->Xpos, obstacle[i]->Ypos, obstacle[i]->Width, obstacle[i]->Height);
+		BSP_LCD_FillRect(obstacle[i].Xpos, obstacle[i].Ypos, obstacle[i].Width, obstacle[i].Height);
 	}
 }
