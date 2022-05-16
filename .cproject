@@ -47,11 +47,11 @@
 									<listOptionValue builtIn="false" value="../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy"/>
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F4xx/Include"/>
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Include"/>
-									<listOptionValue builtIn="false" value="/home/dawid/STM32CubeIDE/workspace_1.8.0/Ball-Game/Drivers/BSP/STM32F429I-Discovery"/>
-									<listOptionValue builtIn="false" value="/home/dawid/STM32CubeIDE/workspace_1.8.0/Ball-Game/Drivers/BSP/Components/ili9341"/>
-									<listOptionValue builtIn="false" value="/home/dawid/STM32CubeIDE/workspace_1.8.0/Ball-Game/Drivers/BSP/Components/Common"/>
-									<listOptionValue builtIn="false" value="/home/dawid/STM32CubeIDE/workspace_1.8.0/Ball-Game/Drivers/BSP/Components/l3gd20"/>
-									<listOptionValue builtIn="false" value="/home/dawid/STM32CubeIDE/workspace_1.8.0/Ball-Game/Utilities/Fonts"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Ball-Game/Drivers/BSP/STM32F429I-Discovery}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Ball-Game/Drivers/BSP/Components/ili9341}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Ball-Game/Utilities/Fonts}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Ball-Game/Drivers/BSP/Components/l3gd20}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Ball-Game/Drivers/BSP/Components/Common}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.695100873" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
