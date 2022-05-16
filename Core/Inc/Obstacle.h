@@ -24,14 +24,14 @@ typedef struct
 
 void Obstacle_Init(ObstacleDef *obstacle, uint16_t X, uint16_t Y, uint16_t width, uint16_t height);
 
-void SingleObstacle_Move(ObstacleDef *obstacle, uint16_t X, uint16_t Y);
+void SingleObstacle_Move(ObstacleDef *obstacle, int X, int Y);
 
-void MultiObstacle_Move(ObstacleDef **obstacle, uint16_t X, uint16_t Y);
+void MultiObstacle_Move(ObstacleDef **obstacle, uint8_t NumberOfObjects, int X, int Y);
 
-int IfCollisionDetect(ObstacleDef **obstacle);
+int IfCollisionDetect(ObstacleDef **obstacle, uint8_t NumberOfObjects);
 
 void SingleObstacle_Draw(ObstacleDef *obstacle);
 
-void MultiObstacle_Draw(ObstacleDef **obstacle);
+void MultiObstacle_Draw(ObstacleDef **obstacle, uint8_t NumberOfObjects);
 
 #endif /* INC_OBSTACLE_H_ */
