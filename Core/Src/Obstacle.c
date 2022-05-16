@@ -73,8 +73,8 @@ int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects)
 void SingleObstacle_Draw(ObstacleDef *obstacle)
 {
 	BSP_LCD_SetTextColor(LCD_COLOR_BROWN);
-	if(obstacle->Ypos - obstacle->Height >= 0)
-		BSP_LCD_FillRect(obstacle->Xpos, obstacle->Ypos, obstacle->Width, obstacle->Height);
+	if(obstacle->Ypos + obstacle->Height <= BSP_LCD_GetYSize())
+		BSP_LCD_FillRect((uint16_t)obstacle->Xpos, (uint16_t)obstacle->Ypos, obstacle->Width, obstacle->Height);
 }
 
 void MultiObstacle_Draw(ObstacleDef *obstacle, uint8_t NumberOfObjects)
@@ -83,7 +83,7 @@ void MultiObstacle_Draw(ObstacleDef *obstacle, uint8_t NumberOfObjects)
 
 	for(uint8_t i = 0; i < NumberOfObjects; ++i)
 	{
-		if(obstacle[i].Ypos - obstacle[i].Height >= 0)
-			BSP_LCD_FillRect(obstacle[i].Xpos, obstacle[i].Ypos, obstacle[i].Width, obstacle[i].Height);
+		if(obstacle->Ypos + obstacle->Height <= BSP_LCD_GetYSize())
+			BSP_LCD_FillRect((uint16_t)obstacle[i].Xpos, (uint16_t)obstacle[i].Ypos, obstacle[i].Width, obstacle[i].Height);
 	}
 }

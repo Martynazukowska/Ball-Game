@@ -17,8 +17,8 @@
  */
 typedef struct
 {
-	uint16_t Xpos;
-	uint16_t Ypos;
+	int16_t Xpos;
+	int16_t Ypos;
 	uint16_t Width;
 	uint16_t Height;
 }ObstacleDef;

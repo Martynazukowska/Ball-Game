@@ -47,7 +47,7 @@
 #define DPS_SCALE_500 0.01750f
 #define DPS_SCALE_2000 0.070f
 #define DPS_SCALE_USER 0.0008f
-#define OBSTACLES_NUMBER 4
+#define OBSTACLES_NUMBER 8
 //#define BETA 0.75279f
 /* USER CODE END PD */
 
@@ -92,7 +92,6 @@ static void MX_LTDC_Init(void);
 static void MX_SPI5_Init(void);
 static void MX_TIM6_Init(void);
 /* USER CODE BEGIN PFP */
-void Draw_Obstacle(ObstacleDef *obs);
 static void LCD_Config(void);
 /* USER CODE END PFP */
 
@@ -166,10 +165,14 @@ int main(void)
   float Xpos = BSP_LCD_GetXSize()/2;
   int Ypos = 60;
 
-  Obstacle_Init(&obstacles[0], 0, BSP_LCD_GetYSize() - 30, 95, 30);
-  Obstacle_Init(&obstacles[1], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() - 30, 95, 30);
-  Obstacle_Init(&obstacles[2], 0, BSP_LCD_GetYSize() + 60, 95, 30);
-  Obstacle_Init(&obstacles[3], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 60, 95, 30);
+  Obstacle_Init(&obstacles[0], 0, BSP_LCD_GetYSize(), 95, 30);
+  Obstacle_Init(&obstacles[1], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize(), 95, 30);
+  Obstacle_Init(&obstacles[2], 0, BSP_LCD_GetYSize() + 80, 95, 30);
+  Obstacle_Init(&obstacles[3], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 80, 95, 30);
+  Obstacle_Init(&obstacles[4], 0, BSP_LCD_GetYSize() + 140, 110, 30);
+  Obstacle_Init(&obstacles[5], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 140, 95, 30);
+  Obstacle_Init(&obstacles[6], 0, BSP_LCD_GetYSize() + 210, 30, 30);
+  Obstacle_Init(&obstacles[7], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 210, 95, 30);
 
   /* Configure 2 layers w/ Blending */
   LCD_Config();
@@ -829,12 +832,6 @@ static void LCD_Config(void)
     /* Initialization Error */
     Error_Handler();
   }
-}
-
-void Draw_Obstacle(ObstacleDef *obs)
-{
-	BSP_LCD_SetTextColor(LCD_COLOR_BROWN);
-	BSP_LCD_FillRect(obs->Xpos, obs->Ypos, obs->Width, obs->Height);
 }
 
 /**
