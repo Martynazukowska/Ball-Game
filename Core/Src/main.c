@@ -27,6 +27,7 @@
 #include "stm32f429i_discovery_gyroscope.h"
 #include "FirstOrderIIR.h"
 #include "Velocity.h"
+#include "Obstacle.h"
 //#include "st_logo1.h"
 //#include "st_logo2.h"
 //#include "Rectangle_2.h"
@@ -35,17 +36,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-/**
- * @brief struct of an obstacle
- * @det has X, Y beginnig positions, width and height
- */
-typedef struct
-{
-	uint16_t Xpos;
-	uint16_t Ypos;
-	uint16_t Width;
-	uint16_t Height;
-}ObstacleDef;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -56,6 +47,7 @@ typedef struct
 #define DPS_SCALE_500 0.01750f
 #define DPS_SCALE_2000 0.070f
 #define DPS_SCALE_USER 0.0008f
+#define OBSTACLES_NUMBER 2
 //#define BETA 0.75279f
 /* USER CODE END PD */
 
@@ -86,6 +78,8 @@ __IO float X = 0;
 __IO int gyro_flag = 0;
 FirstOrderIIR_t filter;
 Velocity_t velocity;
+
+ObstacleDef *obstacles[OBSTACLES_NUMBER];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -170,8 +164,10 @@ int main(void)
   float Xpos = BSP_LCD_GetXSize()/2;
   int Ypos = 60;
 
-  ObstacleDef Obs_Left = {0, BSP_LCD_GetYSize()-30, 60, 30};
-  ObstacleDef Obs_Right = {BSP_LCD_GetXSize()-100, BSP_LCD_GetYSize()-60, 100, 30};
+//  ObstacleDef Obs_Left = {0, BSP_LCD_GetYSize()-30, 60, 30};
+//  ObstacleDef Obs_Right = {BSP_LCD_GetXSize()-100, BSP_LCD_GetYSize()-60, 100, 30};
+  Obstacle_Init(obstacles[0], 0, BSP_LCD_GetYSize()-30, 60, 30);
+  Obstacle_Init(obstacles[1], BSP_LCD_GetXSize()-100, BSP_LCD_GetYSize()-60, 100, 30);
 
   /* Configure 2 layers w/ Blending */
   LCD_Config();
@@ -193,14 +189,19 @@ int main(void)
 	  else if(Xpos <20)
 		  Xpos = 20;
 //	  Background Layer To raczej do jakiejś zmiany, żeby nie pisać pozycji dla każdej przeszkody
-	  Draw_Obstacle(&Obs_Left);
-	  Obs_Left.Ypos -= 1;
-	  if(Obs_Left.Ypos <= 30)
-		  Obs_Left.Ypos = BSP_LCD_GetYSize()-30;
-	  Draw_Obstacle(&Obs_Right);
-	  Obs_Right.Ypos -= 1;
-	  if(Obs_Right.Ypos <= 30)
-		  Obs_Right.Ypos = BSP_LCD_GetYSize()-30;
+//	  Draw_Obstacle(&Obs_Left);
+//	  Obs_Left.Ypos -= 1;
+//	  if(Obs_Left.Ypos <= 30)
+//		  Obs_Left.Ypos = BSP_LCD_GetYSize()-30;
+//	  Draw_Obstacle(&Obs_Right);
+//	  Obs_Right.Ypos -= 1;
+//	  if(Obs_Right.Ypos <= 30)
+//		  Obs_Right.Ypos = BSP_LCD_GetYSize()-30;
+
+	  SingleObstacle_Move(obstacles[0], 0, -1);
+	  SingleObstacle_Move(obstacles[1], 0, -1);
+	  SingleObstacle_Draw(obstacles[0]);
+	  SingleObstacle_Draw(obstacles[1]);
 
 //	  Foreground Layer
 	  BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
