@@ -70,6 +70,7 @@ TIM_HandleTypeDef htim6;
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
+
 GYRO_DrvTypeDef gyroscope;
 LTDC_HandleTypeDef LtdcHandle;
 
@@ -79,7 +80,6 @@ __IO int gyro_flag = 0;
 FirstOrderIIR_t filter;
 Velocity_t velocity;
 
-//ObstacleDef obstacles_0
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -165,8 +165,8 @@ int main(void)
   float Xpos = BSP_LCD_GetXSize()/2;
   int Ypos = 60;
 
-  Obstacle_Init(&obstacles[0], 0, BSP_LCD_GetYSize(), 95, 30);
-  Obstacle_Init(&obstacles[1], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize(), 95, 30);
+  Obstacle_Init(&obstacles[0], 0, BSP_LCD_GetYSize()-30, 95, 30);
+  Obstacle_Init(&obstacles[1], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize()-30, 95, 30);
   Obstacle_Init(&obstacles[2], 0, BSP_LCD_GetYSize() + 80, 95, 30);
   Obstacle_Init(&obstacles[3], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 80, 95, 30);
   Obstacle_Init(&obstacles[4], 0, BSP_LCD_GetYSize() + 140, 110, 30);
@@ -175,7 +175,7 @@ int main(void)
   Obstacle_Init(&obstacles[7], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 210, 95, 30);
 
   /* Configure 2 layers w/ Blending */
-  LCD_Config();
+  LCD_Config();	//bez niej nie ma przerwania dla wyświetlania
   HAL_TIM_Base_Start_IT(&htim6);
   /* USER CODE END 2 */
 
@@ -194,10 +194,6 @@ int main(void)
 			  Xpos = 20;
 	  }
 
-//	  SingleObstacle_Move(&obstacles[0], 0, -1);
-//	  SingleObstacle_Move(&obstacles[1], 0, -1);
-//	  SingleObstacle_Draw(&obstacles[0]);
-//	  SingleObstacle_Draw(&obstacles[1]);
 
 	  Obstacle_OverflowNew(obstacles, OBSTACLES_NUMBER);
 
@@ -426,7 +422,7 @@ static void MX_LTDC_Init(void)
   pLayerCfg1.Alpha0 = 0;
   pLayerCfg1.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
   pLayerCfg1.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-  pLayerCfg1.FBStartAdress = 0;
+  pLayerCfg1.FBStartAdress = 0xD0050000;
   pLayerCfg1.ImageWidth = 0;
   pLayerCfg1.ImageHeight = 0;
   pLayerCfg1.Backcolor.Blue = 0;
@@ -757,7 +753,7 @@ static void LCD_Config(void)
 
   /* Pixel Format configuration*/
 
- // pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
+//  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
   pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_ARGB8888;
   /* Start Address configuration : frame buffer is located at FLASH memory */
   //pLayerCfg.FBStartAdress = (uint32_t)&ST_LOGO_1;
@@ -789,11 +785,11 @@ static void LCD_Config(void)
   pLayerCfg1.WindowY1 = BSP_LCD_GetYSize();
 
   /* Pixel Format configuration*/
-  //pLayerCfg1.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
-  pLayerCfg.PixelFormat =LTDC_PIXEL_FORMAT_ARGB8888;
+//  pLayerCfg1.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
+  pLayerCfg1.PixelFormat =LTDC_PIXEL_FORMAT_ARGB8888;
   /* Start Address configuration : frame buffer is located at FLASH memory */
  // pLayerCfg1.FBStartAdress = (uint32_t)&ST_LOGO_2;
-  pLayerCfg1.FBStartAdress =0xD0050000;
+  pLayerCfg1.FBStartAdress =0xD0000000;
 
   /* Alpha constant (255 totally opaque) */
   pLayerCfg1.Alpha = 200;
