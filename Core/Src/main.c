@@ -26,7 +26,6 @@
 #include "l3gd20.h"
 #include "stm32f429i_discovery_gyroscope.h"
 #include "FirstOrderIIR.h"
-#include "Velocity.h"
 #include "Obstacle.h"
 //#include "st_logo1.h"
 //#include "st_logo2.h"
@@ -80,7 +79,6 @@ __IO uint32_t ReloadFlag = 0;
 __IO float X = 0;
 __IO int gyro_flag = 0;
 FirstOrderIIR_t filter;
-Velocity_t velocity;
 
 /* USER CODE END PV */
 
@@ -119,7 +117,6 @@ int main(void)
 
   /* USER CODE BEGIN Init */
   FirstOrderIIR_Init(&filter, ALPHA, BETA_0, BETA_1);
-  VelocityStructure_Init(&velocity);
   srand(time(NULL));
   /* USER CODE END Init */
 
@@ -145,13 +142,6 @@ int main(void)
   BSP_LCD_Init();
   BSP_LCD_LayerDefaultInit(LCD_BACKGROUND_LAYER, LCD_FRAME_BUFFER);
   BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER); //+ BUFFER_OFFSET
-
-/*
-  uint32_t LCD2=LCD_FRAME_BUFFER +1;
-
-  BSP_LCD_LayerDefaultInit(LCD_BACKGROUND_LAYER, LCD2);
-  BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD2);
-*/
 
   BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
   BSP_LCD_DisplayOn();
@@ -853,9 +843,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		BSP_GYRO_GetXYZ(XYZ);
 
 		X = FirstOrderIIR_Update(&filter, XYZ[1]) * DPS_SCALE_2000 * DPS_SCALE_USER;
-//		X = FirstOrderIIR_Update(&filter, XYZ[1]);
-//		X = VelocityStructure_Update(&velocity, X * DPS_SCALE_2000) * DPS_SCALE_USER;
-
 	}
 }
 /* USER CODE END 4 */
