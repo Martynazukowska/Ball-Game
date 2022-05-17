@@ -23,11 +23,16 @@ typedef struct
 	uint16_t Height;
 }ObstacleDef;
 
+/**
+ * @brief initialize one object with given params
+ */
 void Obstacle_Init(ObstacleDef *obstacle, int16_t X, int16_t Y, uint16_t width, uint16_t height);
 
 void Obstacle_Overflow(ObstacleDef *obstacle, uint8_t NumberOfObjects);
 
-void Obstacle_OverflowNew(ObstacleDef *obstacle, uint8_t NumberOfObjects);
+void Obstacle_OverflowRandom(ObstacleDef *obstacle, uint8_t NumberOfObjects, uint16_t width_limit);
+
+void ParityObstacle_OverflowNew(ObstacleDef *obstacle, uint8_t NumberOfObjects);
 
 void SingleObstacle_Move(ObstacleDef *obstacle, int16_t X, int16_t Y);
 

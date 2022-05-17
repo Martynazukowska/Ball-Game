@@ -48,7 +48,7 @@
 #define DPS_SCALE_500 0.01750f
 #define DPS_SCALE_2000 0.070f
 #define DPS_SCALE_USER 0.00095f
-#define OBSTACLES_NUMBER 8
+#define OBSTACLES_NUMBER 4
 //#define BETA 0.75279f
 /* USER CODE END PD */
 
@@ -97,7 +97,7 @@ static void LCD_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+static void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_t width_limit, uint16_t height_limit , uint16_t gap);
 /* USER CODE END 0 */
 
 /**
@@ -136,17 +136,15 @@ int main(void)
   MX_SPI5_Init();
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
-
-
-
   BSP_LCD_Init();
   BSP_LCD_LayerDefaultInit(LCD_BACKGROUND_LAYER, LCD_FRAME_BUFFER);
   BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER); //+ BUFFER_OFFSET
-
   BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
   BSP_LCD_DisplayOn();
   BSP_LCD_Clear(LCD_COLOR_BLACK);
-
+  /* Configure 2 layers w/ Blending */
+  LCD_Config();	//bez niej nie ma przerwania dla wyświetlania
+   /* Gyroscope init */
   if(BSP_GYRO_Init() != GYRO_OK)
   {
 	  BSP_LCD_DisplayStringAtLine(1, (uint8_t*)"[FAIL]");
@@ -157,17 +155,21 @@ int main(void)
   float Xpos = BSP_LCD_GetXSize()/2;
   int Ypos = 60;
 
-  Obstacle_Init(&obstacles[0], 0, BSP_LCD_GetYSize()-30, 95, 30);
-  Obstacle_Init(&obstacles[1], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize()-30, 95, 30);
-  Obstacle_Init(&obstacles[2], 0, BSP_LCD_GetYSize() + 80, 95, 30);
-  Obstacle_Init(&obstacles[3], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 80, 95, 30);
-  Obstacle_Init(&obstacles[4], 0, BSP_LCD_GetYSize() + 140, 110, 30);
-  Obstacle_Init(&obstacles[5], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 140, 95, 30);
-  Obstacle_Init(&obstacles[6], 0, BSP_LCD_GetYSize() + 210, 30, 30);
-  Obstacle_Init(&obstacles[7], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 210, 95, 30);
+//  Obstacle_Init(&obstacles[0], 0, BSP_LCD_GetYSize()-30, 95, 30);
+//  Obstacle_Init(&obstacles[1], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize()-30, 95, 30);
+//  Obstacle_Init(&obstacles[2], 0, BSP_LCD_GetYSize() + 80, 95, 30);
+//  Obstacle_Init(&obstacles[3], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 80, 95, 30);
+//  Obstacle_Init(&obstacles[4], 0, BSP_LCD_GetYSize() + 140, 110, 30);
+//  Obstacle_Init(&obstacles[5], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 140, 95, 30);
+//  Obstacle_Init(&obstacles[6], 0, BSP_LCD_GetYSize() + 210, 30, 30);
+//  Obstacle_Init(&obstacles[7], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 210, 95, 30);
 
-  /* Configure 2 layers w/ Blending */
-  LCD_Config();	//bez niej nie ma przerwania dla wyświetlania
+//  MultiObstacle_Init(obstacles, OBSTACLES_NUMBER, BSP_LCD_GetYSize(), 10);
+  uint16_t width_limit = 120;
+  uint16_t height_limit = 10;
+  uint16_t gap = 30;
+  Generate_Obstacles(obstacles, OBSTACLES_NUMBER, width_limit, height_limit , gap);
+
   HAL_TIM_Base_Start_IT(&htim6);
   /* USER CODE END 2 */
 
@@ -186,15 +188,13 @@ int main(void)
 			  Xpos = 20;
 	  }
 
-
-	  Obstacle_OverflowNew(obstacles, OBSTACLES_NUMBER);
-
+	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
 	  MultiObstacle_Move(obstacles, OBSTACLES_NUMBER, 0, -1);
 	  MultiObstacle_Draw(obstacles, OBSTACLES_NUMBER);
 
 //	  Foreground Layer
 	  BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
-	  BSP_LCD_SetTextColor(LCD_COLOR_LIGHTMAGENTA);
+	  BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
 	  BSP_LCD_FillCircle(Xpos, Ypos+20, 20);
 
 	  HAL_LTDC_SetWindowPosition_NoReload(&LtdcHandle, 0, 0, 0);
@@ -661,6 +661,30 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_t width_limit, uint16_t height_limit, uint16_t gap)
+{
+	int16_t X;
+	int16_t Y = BSP_LCD_GetYSize();
+	uint16_t width;
+
+	for(uint8_t i = 0; i < NumberOfObjects; ++i)
+	{
+		X = rand() % BSP_LCD_GetXSize() + 40;
+		Y += i * gap;
+
+		if(BSP_LCD_GetXSize() - X < 50)
+			width = BSP_LCD_GetXSize() - X;
+		else if(BSP_LCD_GetXSize() - X > BSP_LCD_GetXSize() - 50)
+		{
+			X = 0;
+			width = rand() % width_limit;
+		}
+		else
+			width = rand() % width_limit;
+		Obstacle_Init(&obstacles[i], X, Y, width, height_limit);
+	}
+}
 
 /**
   * @brief LCD Configuration.
