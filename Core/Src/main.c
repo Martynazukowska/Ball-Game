@@ -48,7 +48,7 @@
 #define DPS_SCALE_500 0.01750f
 #define DPS_SCALE_2000 0.070f
 #define DPS_SCALE_USER 0.00095f
-#define OBSTACLES_NUMBER 4
+#define OBSTACLES_NUMBER 5
 //#define BETA 0.75279f
 /* USER CODE END PD */
 
@@ -155,19 +155,9 @@ int main(void)
   float Xpos = BSP_LCD_GetXSize()/2;
   int Ypos = 60;
 
-//  Obstacle_Init(&obstacles[0], 0, BSP_LCD_GetYSize()-30, 95, 30);
-//  Obstacle_Init(&obstacles[1], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize()-30, 95, 30);
-//  Obstacle_Init(&obstacles[2], 0, BSP_LCD_GetYSize() + 80, 95, 30);
-//  Obstacle_Init(&obstacles[3], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 80, 95, 30);
-//  Obstacle_Init(&obstacles[4], 0, BSP_LCD_GetYSize() + 140, 110, 30);
-//  Obstacle_Init(&obstacles[5], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 140, 95, 30);
-//  Obstacle_Init(&obstacles[6], 0, BSP_LCD_GetYSize() + 210, 30, 30);
-//  Obstacle_Init(&obstacles[7], BSP_LCD_GetXSize() - 100, BSP_LCD_GetYSize() + 210, 95, 30);
-
-//  MultiObstacle_Init(obstacles, OBSTACLES_NUMBER, BSP_LCD_GetYSize(), 10);
-  uint16_t width_limit = 120;
+  uint16_t width_limit = 80;
   uint16_t height_limit = 10;
-  uint16_t gap = 30;
+  uint16_t gap = 60;
   Generate_Obstacles(obstacles, OBSTACLES_NUMBER, width_limit, height_limit , gap);
 
   HAL_TIM_Base_Start_IT(&htim6);
@@ -188,7 +178,9 @@ int main(void)
 			  Xpos = 20;
 	  }
 
-	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
+//	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
+//	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
+	  ParityObstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
 	  MultiObstacle_Move(obstacles, OBSTACLES_NUMBER, 0, -1);
 	  MultiObstacle_Draw(obstacles, OBSTACLES_NUMBER);
 
@@ -671,7 +663,7 @@ void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_
 	for(uint8_t i = 0; i < NumberOfObjects; ++i)
 	{
 		X = rand() % BSP_LCD_GetXSize() + 40;
-		Y += i * gap;
+		Y += gap;
 
 		if(BSP_LCD_GetXSize() - X < 50)
 			width = BSP_LCD_GetXSize() - X;

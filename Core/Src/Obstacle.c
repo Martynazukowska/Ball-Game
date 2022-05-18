@@ -20,22 +20,6 @@ void Obstacle_Init(ObstacleDef *obstacle, int16_t X, int16_t Y, uint16_t width, 
 	obstacle->Height = height;
 }
 
-void MultiObstacle_Init(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t Y, uint16_t height)
-{
-	uint16_t diff = 40;
-	int16_t X, width;
-	for(uint8_t i = 0; i < NumberOfObjects; ++i)
-	{
-		Y += i * 60;
-		X = rand() % (BSP_LCD_GetXSize() - diff);
-		if(X >= 200)
-			width = BSP_LCD_GetXSize() - X;
-		else
-			width = rand() % (BSP_LCD_GetXSize() - diff);
-		Obstacle_Init(&obstacle[i], X, Y, width, height);
-	}
-}
-
 void Obstacle_Overflow(ObstacleDef *obstacle, uint8_t NumberOfObjects)
 {
 	for(uint8_t i = 0; i < NumberOfObjects; ++i)
@@ -68,9 +52,9 @@ void Obstacle_OverflowRandom(ObstacleDef *obstacle, uint8_t NumberOfObjects, uin
 	}
 }
 
-void ParityObstacle_OverflowNew(ObstacleDef *obstacle, uint8_t NumberOfObjects)
+void ParityObstacle_OverflowRandom(ObstacleDef *obstacle, uint8_t NumberOfObjects, uint16_t width_limit)
 {
-	uint16_t diff;
+	uint16_t width;
 	for(uint8_t i = 0; i < NumberOfObjects; ++i)
 	{
 		if(obstacle[i].Ypos <= 0)
@@ -78,13 +62,13 @@ void ParityObstacle_OverflowNew(ObstacleDef *obstacle, uint8_t NumberOfObjects)
 			obstacle[i].Ypos = BSP_LCD_GetYSize() - obstacle[i].Height;
 			if(i % 2 == 0)
 			{
-				diff = (rand() % 80) + 20;
-				Obstacle_Init(&obstacle[i], 0, obstacle[i].Ypos, diff, obstacle[i].Height);
+				width = (rand() % width_limit) + 20;
+				Obstacle_Init(&obstacle[i], 0, obstacle[i].Ypos, width, obstacle[i].Height);
 			}
 			else
 			{
-				diff = (rand() % 80) + 20;
-				Obstacle_Init(&obstacle[i], BSP_LCD_GetXSize() - diff, obstacle[i].Ypos, diff, obstacle[i].Height);
+				width = (rand() % width_limit) + 20;
+				Obstacle_Init(&obstacle[i], BSP_LCD_GetXSize() - width, obstacle[i].Ypos, width, obstacle[i].Height);
 			}
 		}
 	}

@@ -32,7 +32,7 @@ void Obstacle_Overflow(ObstacleDef *obstacle, uint8_t NumberOfObjects);
 
 void Obstacle_OverflowRandom(ObstacleDef *obstacle, uint8_t NumberOfObjects, uint16_t width_limit);
 
-void ParityObstacle_OverflowNew(ObstacleDef *obstacle, uint8_t NumberOfObjects);
+void ParityObstacle_OverflowRandom(ObstacleDef *obstacle, uint8_t NumberOfObjects, uint16_t width_limit);
 
 void SingleObstacle_Move(ObstacleDef *obstacle, int16_t X, int16_t Y);
 
