@@ -88,9 +88,21 @@ void MultiObstacle_Move(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t 
 	}
 }
 
-int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects)
+int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X_ball, int16_t Y_ball)
 {
-	return 0;
+	int16_t max_X=X_ball+20;
+	int16_t min_X=X_ball-20;
+	int16_t max_Y=Y_ball+20;
+	int16_t min_Y=Y_ball-20;
+
+
+	for(uint8_t i = 0; i < NumberOfObjects; ++i)
+		{
+			if(/*obstacle->Ypos <=max_Y && obstacle->Ypos>=min_Y> && obstacle->Xpos+obstacle->Width<=max_X && obstacle->Xpos+obstacle->Width>=min_X*/)
+			{
+				return 2;
+			}
+		}
 }
 
 void SingleObstacle_Draw(ObstacleDef *obstacle)

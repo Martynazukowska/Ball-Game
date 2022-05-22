@@ -38,7 +38,7 @@ void SingleObstacle_Move(ObstacleDef *obstacle, int16_t X, int16_t Y);
 
 void MultiObstacle_Move(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X, int16_t Y);
 
-int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects);
+int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X_ball, int16_t Y_ball);
 
 void SingleObstacle_Draw(ObstacleDef *obstacle);
 
