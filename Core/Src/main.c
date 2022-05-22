@@ -78,6 +78,7 @@ LTDC_HandleTypeDef LtdcHandle;
 __IO uint32_t ReloadFlag = 0;
 __IO float X = 0;
 __IO int gyro_flag = 0;
+__IO int tryb = 0;
 FirstOrderIIR_t filter;
 
 /* USER CODE END PV */
@@ -167,39 +168,83 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if(gyro_flag == 1)
+	  switch(tryb)
 	  {
-		  gyro_flag = 0;
-		  Xpos += X;
+	  	  //start
+	  	  case 0:
+	  		BSP_LCD_Clear(LCD_COLOR_BLACK);
+	  		HAL_Delay(5000);
+	  		tryb=1;
+	          break;
+	  	  case 1:
+	  		if(gyro_flag == 1)
+	  			  {
+	  				  gyro_flag = 0;
+	  				  Xpos += X;
 
-		  if(Xpos > BSP_LCD_GetXSize() - 20)
-			  Xpos = BSP_LCD_GetXSize() - 20;
-		  else if(Xpos <20)
-			  Xpos = 20;
+	  				  if(Xpos > BSP_LCD_GetXSize() - 20)
+	  					  Xpos = BSP_LCD_GetXSize() - 20;
+	  				  else if(Xpos <20)
+	  					  Xpos = 20;
+	  			  }
+
+	  		//	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
+	  		//	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
+	  			  ParityObstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
+	  			  MultiObstacle_Move(obstacles, OBSTACLES_NUMBER, 0, -1);
+	  			  MultiObstacle_Draw(obstacles, OBSTACLES_NUMBER);
+
+	  		//	  Foreground Layer
+	  			  BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
+	  			  BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
+	  			  BSP_LCD_FillCircle(Xpos, Ypos+20, 20);
+
+	  			  HAL_LTDC_SetWindowPosition_NoReload(&LtdcHandle, 0, 0, 0);
+	  			  /* reconfigure the layer2 position  without Reloading*/
+	  			  HAL_LTDC_SetWindowPosition_NoReload(&LtdcHandle, 0, 0, 1);
+	  			  /* Ask for LTDC reload within next vertical blanking*/
+	  			  ReloadFlag = 0;
+
+	  			  HAL_LTDC_Reload(&LtdcHandle,LTDC_SRCR_VBR);
+
+	  			  while(ReloadFlag == 0) 	{/* wait till reload takes effect */}
+
+	  			  BSP_LCD_Clear(LCD_COLOR_BLACK);
+	  		  break;
 	  }
-
-//	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
-//	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
-	  ParityObstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
-	  MultiObstacle_Move(obstacles, OBSTACLES_NUMBER, 0, -1);
-	  MultiObstacle_Draw(obstacles, OBSTACLES_NUMBER);
-
-//	  Foreground Layer
-	  BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
-	  BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
-	  BSP_LCD_FillCircle(Xpos, Ypos+20, 20);
-
-	  HAL_LTDC_SetWindowPosition_NoReload(&LtdcHandle, 0, 0, 0);
-	  /* reconfigure the layer2 position  without Reloading*/
-	  HAL_LTDC_SetWindowPosition_NoReload(&LtdcHandle, 0, 0, 1);
-	  /* Ask for LTDC reload within next vertical blanking*/
-	  ReloadFlag = 0;
-
-	  HAL_LTDC_Reload(&LtdcHandle,LTDC_SRCR_VBR);
-
-	  while(ReloadFlag == 0) 	{/* wait till reload takes effect */}
-
-	  BSP_LCD_Clear(LCD_COLOR_BLACK);
+//	  if(gyro_flag == 1)
+//	  {
+//		  gyro_flag = 0;
+//		  Xpos += X;
+//
+//		  if(Xpos > BSP_LCD_GetXSize() - 20)
+//			  Xpos = BSP_LCD_GetXSize() - 20;
+//		  else if(Xpos <20)
+//			  Xpos = 20;
+//	  }
+//
+////	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
+////	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
+//	  ParityObstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
+//	  MultiObstacle_Move(obstacles, OBSTACLES_NUMBER, 0, -1);
+//	  MultiObstacle_Draw(obstacles, OBSTACLES_NUMBER);
+//
+////	  Foreground Layer
+//	  BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
+//	  BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
+//	  BSP_LCD_FillCircle(Xpos, Ypos+20, 20);
+//
+//	  HAL_LTDC_SetWindowPosition_NoReload(&LtdcHandle, 0, 0, 0);
+//	  /* reconfigure the layer2 position  without Reloading*/
+//	  HAL_LTDC_SetWindowPosition_NoReload(&LtdcHandle, 0, 0, 1);
+//	  /* Ask for LTDC reload within next vertical blanking*/
+//	  ReloadFlag = 0;
+//
+//	  HAL_LTDC_Reload(&LtdcHandle,LTDC_SRCR_VBR);
+//
+//	  while(ReloadFlag == 0) 	{/* wait till reload takes effect */}
+//
+//	  BSP_LCD_Clear(LCD_COLOR_BLACK);
 
     /* USER CODE END WHILE */
 
