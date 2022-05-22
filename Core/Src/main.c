@@ -168,9 +168,24 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0))
+	  {
+		  tryb=1;
+	  }
+	  else
+	  {
 	  switch(tryb)
 	  {
 	  case 0:
+		  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+		  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
+		  BSP_LCD_Clear(LCD_COLOR_BLACK);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-30, (uint8_t*)"NACISNIJ",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2, (uint8_t*)"NIEBIESKI",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+30, (uint8_t*)"PRZYCISK",CENTER_MODE);
+		  HAL_Delay(500);
+		  break;
+	  case 1:
 		BSP_LCD_Clear(LCD_COLOR_BLACK);
 		BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
 		BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
@@ -186,9 +201,9 @@ int main(void)
 		BSP_LCD_Clear(LCD_COLOR_BLACK);
 		BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-10, (uint8_t*)"START",CENTER_MODE);
 		HAL_Delay(2000);
-		tryb=1;
+		tryb=2;
 		  break;
-	  case 1:
+	  case 2:
 
 		  if(gyro_flag == 1)
 		  	  {
@@ -225,6 +240,7 @@ int main(void)
 		  	  BSP_LCD_Clear(LCD_COLOR_BLACK);
 
 		  break;
+	  }
 	  }
 //	  if(gyro_flag == 1)
 //	  {
@@ -465,7 +481,7 @@ static void MX_LTDC_Init(void)
   pLayerCfg1.Alpha0 = 0;
   pLayerCfg1.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
   pLayerCfg1.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-  pLayerCfg1.FBStartAdress = 0xD0050000;
+  pLayerCfg1.FBStartAdress = 0;
   pLayerCfg1.ImageWidth = 0;
   pLayerCfg1.ImageHeight = 0;
   pLayerCfg1.Backcolor.Blue = 0;
@@ -642,8 +658,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : B1_Pin MEMS_INT1_Pin MEMS_INT2_Pin TP_INT1_Pin */
-  GPIO_InitStruct.Pin = B1_Pin|MEMS_INT1_Pin|MEMS_INT2_Pin|TP_INT1_Pin;
+  /*Configure GPIO pin : PA0 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : MEMS_INT1_Pin MEMS_INT2_Pin TP_INT1_Pin */
+  GPIO_InitStruct.Pin = MEMS_INT1_Pin|MEMS_INT2_Pin|TP_INT1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_EVT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
