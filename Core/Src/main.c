@@ -216,6 +216,12 @@ int main(void)
 		  			  Xpos = 20;
 		  	  }
 
+		  if(IfCollisionDetect(obstacles, OBSTACLES_NUMBER,Xpos,80))
+		  {
+			  tryb=0;
+			  HAL_Delay(2000);
+		  }
+
 		  //	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
 		  //	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
 		  	  ParityObstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
