@@ -42,4 +42,6 @@ void SingleObstacle_Draw(ObstacleDef *obstacle);
 
 void MultiObstacle_Draw(ObstacleDef *obstacle, uint8_t NumberOfObjects);
 
+int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X_ball, int16_t R);
+
 #endif /* INC_OBSTACLE_H_ */
