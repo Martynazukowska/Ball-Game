@@ -216,11 +216,6 @@ int main(void)
 		  			  Xpos = 20;
 		  	  }
 
-		  if(IfCollisionDetect(obstacles,OBSTACLES_NUMBER,Xpos,Ypos)==2)
-		  	  {
-		  		  tryb=0;
-		  	  }
-
 		  //	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
 		  //	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
 		  	  ParityObstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
