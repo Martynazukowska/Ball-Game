@@ -170,7 +170,7 @@ int main(void)
   {
 	  if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0))
 	  {
-		  tryb=1;
+		 tryb=1;
 	  }
 	  else
 	  {
