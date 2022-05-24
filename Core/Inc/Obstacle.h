@@ -2,7 +2,7 @@
  * Obstacle.h
  *
  *  Created on: 16 maj 2022
- *      Author: Dawid Łukasiewicz
+ *      Author: Dawid Łukasiewicz and Martyna Żukowska
  */
 #include <stdlib.h>
 #include <time.h>
@@ -13,6 +13,7 @@
 
 /**
  * @brief struct of an obstacle
+
  * @det has X, Y beginnig positions, width and height
  */
 typedef struct
