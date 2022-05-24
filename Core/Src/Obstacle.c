@@ -162,7 +162,7 @@ void SingleObstacle_Draw(ObstacleDef *obstacle)
 }
 
 /**
- * @brief Drawing all obstacle if not exceedeing LCD max height
+ * @brief Drawing all obstacle if not exceeding LCD max height
  *
  * @note The obstacle is still in memory if not drawn but not to produce any troubles in displaying
  *
@@ -182,102 +182,73 @@ void MultiObstacle_Draw(ObstacleDef *obstacle, uint8_t NumberOfObjects)
 }
 
 
-int max( int16_t a, int16_t b)
+int16_t max( int16_t a, int16_t b)
 {
     return (a < b) ? b : a;
 }
 
-int min( int16_t a, int16_t b)
+int16_t min( int16_t a, int16_t b)
 {
     return (a < b) ? b : a;
 }
-
-
 
 int length(int16_t X, int16_t Y)
 {
 	return sqrt( (X * X) + (Y * Y) );
 }
 
-int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X_ball)
+/**
+ * @brief Detecting collision with all obstacles
+ *
+ * @param obstacle is address of array of ObstacleDef instances
+ *
+ * @param NumberOfObjects number of ObstacleDef instances in the array
+ *
+ * @param X_ball x coordinate for ball
+ *
+ * @param Y_ball x coordinate for ball
+ *
+ * @param Ray ray of ball
+ */
+int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X_ball, int16_t Y_ball, uint16_t Ray)
 {
-	int16_t Ray = 20;
-	int16_t Y_ball = 80;
 
 	for(uint8_t i = 0; i < NumberOfObjects; ++i)
 	{
-		int16_t X1 = obstacle[i].Xpos, X2 = obstacle[i].Xpos + obstacle[i].Width;
-		int16_t Y1 = obstacle[i].Ypos, Y2 = obstacle[i].Ypos + obstacle[i].Height;
 
-		int16_t Ball_length = length(X_ball, Y_ball);
-		int16_t len1 = length(obstacle[i].Xpos, obstacle[i].Ypos);
-		int16_t len2 = length(obstacle[i].Xpos + obstacle[i].Width, obstacle[i].Ypos);
-		int16_t len3 = length(obstacle[i].Xpos, obstacle[i].Ypos + obstacle[i].Height);
-		int16_t len4 = length(obstacle[i].Xpos + obstacle[i].Width, obstacle[i].Ypos + obstacle[i].Height);
-		if(len1 - Ball_length < Ray)
+		if(length(obstacle[i].Xpos - X_ball							, obstacle[i].Ypos - Y_ball) 							< Ray)
 		{
 			BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2, (uint8_t*)"1", CENTER_MODE);
-			return 2;
+			return 1;
 		}
-		if(len2 - Ball_length < Ray)
+
+		if(length(obstacle[i].Xpos + obstacle[i].Width - X_ball		, obstacle[i].Ypos - Y_ball)							< Ray)
 		{
 			BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2, (uint8_t*)"2", CENTER_MODE);
-			return 2;
+			return 1;
 		}
-		if(len3 - Ball_length  < Ray)
+
+		if(length(obstacle[i].Xpos - X_ball							, obstacle[i].Ypos + obstacle[i].Height - Y_ball)		< Ray)
 		{
 			BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2, (uint8_t*)"3", CENTER_MODE);
-			return 2;
+			return 1;
 		}
-		if(len4 - Ball_length < Ray)
+
+		if(length(obstacle[i].Xpos + obstacle[i].Width - X_ball		, obstacle[i].Ypos + obstacle[i].Height - Y_ball) 		< Ray)
 		{
 			BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2, (uint8_t*)"4", CENTER_MODE);
-			return 2;
+			return 1;
+		}
+
+		if(Y_ball + Ray > obstacle[i].Ypos && Y_ball - Ray < obstacle[i].Ypos)
+		{
+			if(X_ball > obstacle[i].Xpos && X_ball < obstacle[i].Xpos + obstacle[i].Width)
+			{
+				BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2, (uint8_t*)"5", CENTER_MODE);
+				return 1;
+			}
 		}
 	}
 	return 0;
 }
-
-//
-//
-//
-//int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X_ball)
-//{
-//  int16_t R= 20;
-//	for(uint8_t i = 0; i < NumberOfObjects; ++i)
-//	{
-//		int16_t obx=obstacle[i].Xpos;
-//		int16_t oby=obstacle[i].Ypos;
-//		int16_t obw=obstacle[i].Width;
-//		int16_t obh=obstacle[i].Height;
-//		// center point circle X_ball
-//
-//	    // calculate Obstacle info (center, half-extents)
-//		int16_t Obstacle_half_extents_x = obstacle[i].Width / 2;
-//		int16_t Obstacle_half_extents_y = obstacle[i].Height/ 2;
-//
-//		int16_t Obstacle_center_x=obstacle[i].Xpos + Obstacle_half_extents_x;
-//		int16_t Obstacle_center_y=obstacle[i].Ypos + Obstacle_half_extents_y;
-//
-//
-//	    // get difference vector between both centers
-//		int16_t difference = sqrt((X_ball - Obstacle_half_extents_x)*(X_ball - Obstacle_half_extents_x) +(80 - Obstacle_half_extents_y)*(80 - Obstacle_half_extents_y));
-//
-//		int16_t clamped_x = max(-Obstacle_half_extents_x, min(Obstacle_half_extents_x, difference));
-//
-//		int16_t clamped_y = max(-Obstacle_half_extents_y, min(Obstacle_half_extents_y, difference));
-//
-//	    // add clamped value to Obstacle_center and we get the value of box closest to circle
-//		int16_t closest_x = Obstacle_center_x + clamped_x;
-//		int16_t closest_y = Obstacle_center_y + clamped_y;
-//
-//	    // retrieve vector between center circle and closest point Obstacle and check if length <= radius
-//	    difference = sqrt((X_ball - closest_x)*(X_ball - closest_x)+(80 - closest_y)*(80 - closest_y));
-//	    if(  difference < R)
-//	    {
-//	    	return 1;
-//	    }
-//	}
-//	return 0;
-//}
 

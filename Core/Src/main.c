@@ -49,7 +49,10 @@
 #define DPS_SCALE_2000 0.070f
 #define DPS_SCALE_USER 0.00095f
 #define OBSTACLES_NUMBER 5
-//#define BETA 0.75279f
+
+#define BALL_Y 60
+#define BALL_RAY 15
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -138,13 +141,12 @@ int main(void)
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
   BSP_LCD_Init();
-  BSP_LCD_LayerDefaultInit(LCD_BACKGROUND_LAYER, LCD_FRAME_BUFFER);
-  BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER); //+ BUFFER_OFFSET
-  BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
-  BSP_LCD_DisplayOn();
+  BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER);
+//  BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER); //+ BUFFER_OFFSET
+  BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
   BSP_LCD_Clear(LCD_COLOR_BLACK);
+
   /* Configure 2 layers w/ Blending */
-  LCD_Config();	//bez niej nie ma przerwania dla wyświetlania
    /* Gyroscope init */
   if(BSP_GYRO_Init() != GYRO_OK)
   {
@@ -154,8 +156,6 @@ int main(void)
   BSP_GYRO_Reset();
 
   float Xpos = BSP_LCD_GetXSize()/2;
-  int Ypos = 60;
-
   uint16_t width_limit = 80;
   uint16_t height_limit = 10;
   uint16_t gap = 60;
@@ -179,11 +179,15 @@ int main(void)
 	  case 0:
 		  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
 		  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
-		  BSP_LCD_Clear(LCD_COLOR_BLACK);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-30, (uint8_t*)"NACISNIJ",CENTER_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2, (uint8_t*)"NIEBIESKI",CENTER_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+30, (uint8_t*)"PRZYCISK",CENTER_MODE);
-		  HAL_Delay(500);
+
+		  ReloadFlag = 0;
+		  BSP_LCD_Relaod(LCD_RELOAD_VERTICAL_BLANKING);
+		  while(ReloadFlag == 0) {} /* wait till reload takes effect */
+		  HAL_Delay(10);
+		  BSP_LCD_Clear(LCD_COLOR_BLACK);
 		  break;
 	  case 1:
 		BSP_LCD_Clear(LCD_COLOR_BLACK);
@@ -200,7 +204,10 @@ int main(void)
 		HAL_Delay(1000);
 		BSP_LCD_Clear(LCD_COLOR_BLACK);
 		BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-10, (uint8_t*)"START",CENTER_MODE);
-		HAL_Delay(2000);
+		HAL_Delay(1000);
+
+		Generate_Obstacles(obstacles, OBSTACLES_NUMBER, width_limit, height_limit , gap);
+
 		tryb=2;
 		  break;
 	  case 2:
@@ -216,72 +223,29 @@ int main(void)
 		  			  Xpos = 20;
 		  	  }
 
-		  if(IfCollisionDetect(obstacles, OBSTACLES_NUMBER,Xpos))
-		  {
-			  tryb=0;
-			  HAL_Delay(2000);
-		  }
-
-		  //	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
-		  //	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
+	  //	  Obstacle_Overflow(obstacles, OBSTACLES_NUMBER);
+	  //	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
 		  	  ParityObstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
 		  	  MultiObstacle_Move(obstacles, OBSTACLES_NUMBER, 0, -1);
 		  	  MultiObstacle_Draw(obstacles, OBSTACLES_NUMBER);
 
-		  //	  Foreground Layer
-		  	  BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
 		  	  BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
-		  	  BSP_LCD_FillCircle(Xpos, Ypos+20, 20);
+		  	  BSP_LCD_FillCircle(Xpos, BALL_Y, BALL_RAY);
 
-		  	  HAL_LTDC_SetWindowPosition_NoReload(&LtdcHandle, 0, 0, 0);
-		  	  /* reconfigure the layer2 position  without Reloading*/
-		  	  HAL_LTDC_SetWindowPosition_NoReload(&LtdcHandle, 0, 0, 1);
-		  	  /* Ask for LTDC reload within next vertical blanking*/
+		  	  if(IfCollisionDetect(obstacles, OBSTACLES_NUMBER, Xpos, BALL_Y, BALL_RAY))
+		  	  {
+		  		  tryb=0;
+		  		  HAL_Delay(2000);
+		  	  }
+
 		  	  ReloadFlag = 0;
-
-		  	  HAL_LTDC_Reload(&LtdcHandle,LTDC_SRCR_VBR);
-
-		  	  while(ReloadFlag == 0) 	{/* wait till reload takes effect */}
-
+		  	  BSP_LCD_Relaod(LCD_RELOAD_VERTICAL_BLANKING);
+		  	  while(ReloadFlag == 0) {} /* wait till reload takes effect */
 		  	  BSP_LCD_Clear(LCD_COLOR_BLACK);
 
 		  break;
 	  }
 	  }
-//	  if(gyro_flag == 1)
-//	  {
-//		  gyro_flag = 0;
-//		  Xpos += X;
-//
-//		  if(Xpos > BSP_LCD_GetXSize() - 20)
-//			  Xpos = BSP_LCD_GetXSize() - 20;
-//		  else if(Xpos <20)
-//			  Xpos = 20;
-//	  }
-//
-////	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
-////	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
-//	  ParityObstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
-//	  MultiObstacle_Move(obstacles, OBSTACLES_NUMBER, 0, -1);
-//	  MultiObstacle_Draw(obstacles, OBSTACLES_NUMBER);
-//
-////	  Foreground Layer
-//	  BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
-//	  BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
-//	  BSP_LCD_FillCircle(Xpos, Ypos+20, 20);
-//
-//	  HAL_LTDC_SetWindowPosition_NoReload(&LtdcHandle, 0, 0, 0);
-//	  /* reconfigure the layer2 position  without Reloading*/
-//	  HAL_LTDC_SetWindowPosition_NoReload(&LtdcHandle, 0, 0, 1);
-//	  /* Ask for LTDC reload within next vertical blanking*/
-//	  ReloadFlag = 0;
-//
-//	  HAL_LTDC_Reload(&LtdcHandle,LTDC_SRCR_VBR);
-//
-//	  while(ReloadFlag == 0) 	{/* wait till reload takes effect */}
-//
-//	  BSP_LCD_Clear(LCD_COLOR_BLACK);
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
