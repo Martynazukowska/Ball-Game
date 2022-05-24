@@ -216,7 +216,7 @@ int main(void)
 		  			  Xpos = 20;
 		  	  }
 
-		  if(IfCollisionDetect(obstacles, OBSTACLES_NUMBER,Xpos,80))
+		  if(IfCollisionDetect(obstacles, OBSTACLES_NUMBER,Xpos))
 		  {
 			  tryb=0;
 			  HAL_Delay(2000);

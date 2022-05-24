@@ -125,9 +125,10 @@ int length(int16_t X, int16_t Y)
 	return sqrt( (X * X) + (Y * Y) );
 }
 
-int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X_ball, int16_t Y_ball)
+int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X_ball)
 {
 	int16_t Ray = 20;
+	int16_t Y_ball = 80;
 
 	for(uint8_t i = 0; i < NumberOfObjects; ++i)
 	{
@@ -166,8 +167,9 @@ int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X_
 //
 //
 //
-//int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X_ball, int16_t R)
+//int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X_ball)
 //{
+//  int16_t R= 20;
 //	for(uint8_t i = 0; i < NumberOfObjects; ++i)
 //	{
 //		int16_t obx=obstacle[i].Xpos;
