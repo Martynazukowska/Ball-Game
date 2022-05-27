@@ -16,6 +16,7 @@ void Item_Init(Item *point, int16_t X, int16_t Y, uint16_t width, uint16_t heigh
 	point->Ypos = Y;
 	point->Width = width;
 	point->Height = height;
+	point->zdobyty=0;
 }
 
 void Item_Overflow(Item *point, uint8_t NumberOfPoints)
@@ -85,8 +86,11 @@ void MultiItem_Move(Item *point, uint8_t NumberOfPoints, int16_t X, int16_t Y)
 void SingleItem_Draw(Item *point)
 {
 	BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
-	if(point->Ypos + point->Height <= BSP_LCD_GetYSize())
-		BSP_LCD_FillRect((uint16_t)point->Xpos, (uint16_t)point->Ypos, point->Width, point->Height);
+	if(point->zdobyty==0)
+	{
+		if(point->Ypos + point->Height <= BSP_LCD_GetYSize())
+			BSP_LCD_FillRect((uint16_t)point->Xpos, (uint16_t)point->Ypos, point->Width, point->Height);
+	}
 }
 
 void MultiItem_Draw(Item *point, uint8_t NumberOfPoints)
@@ -95,8 +99,11 @@ void MultiItem_Draw(Item *point, uint8_t NumberOfPoints)
 
 	for(uint8_t i = 0; i < NumberOfPoints; ++i)
 	{
-		if(point[i].Ypos + point[i].Height <= BSP_LCD_GetYSize())
-			BSP_LCD_FillRect((uint16_t)point[i].Xpos, (uint16_t)point[i].Ypos, point[i].Width, point[i].Height);
+		if(point[i].zdobyty==0)
+		{
+			if(point[i].Ypos + point[i].Height <= BSP_LCD_GetYSize())
+				BSP_LCD_FillRect((uint16_t)point[i].Xpos, (uint16_t)point[i].Ypos, point[i].Width, point[i].Height);
+		}
 	}
 }
 
@@ -113,21 +120,25 @@ int IfScore(Item *point, uint8_t NumberOfPoints, int16_t X_ball, int16_t Y_ball,
 
 		if(length_2(point[i].Xpos - X_ball							, point[i].Ypos - Y_ball) 							< Ray)
 		{
+			point[i].zdobyty=1;
 			return 1;
 		}
 
 		if(length_2(point[i].Xpos + point[i].Width - X_ball		, point[i].Ypos - Y_ball)							< Ray)
 		{
+			point[i].zdobyty=1;
 			return 1;
 		}
 
 		if(length_2(point[i].Xpos - X_ball							, point[i].Ypos + point[i].Height - Y_ball)		< Ray)
 		{
+			point[i].zdobyty=1;
 			return 1;
 		}
 
 		if(length_2(point[i].Xpos + point[i].Width - X_ball		, point[i].Ypos + point[i].Height - Y_ball) 		< Ray)
 		{
+			point[i].zdobyty=1;
 			return 1;
 		}
 
@@ -135,6 +146,7 @@ int IfScore(Item *point, uint8_t NumberOfPoints, int16_t X_ball, int16_t Y_ball,
 		{
 			if(X_ball > point[i].Xpos && X_ball < point[i].Xpos + point[i].Width)
 			{
+				point[i].zdobyty=1;
 				return 1;
 			}
 		}
