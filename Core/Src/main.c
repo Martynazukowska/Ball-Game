@@ -201,7 +201,7 @@ int main(void)
 		  while(ReloadFlag == 0) {} /* wait till reload takes effect */
 		  HAL_Delay(10);
 		  BSP_LCD_Clear(LCD_COLOR_BLACK);
-		  punkty=0;
+		  punkty=45;
 		  break;
 	  case 1:
 		BSP_LCD_Clear(LCD_COLOR_BLACK);
@@ -261,7 +261,7 @@ int main(void)
 
 		  	  if(IfCollisionDetect(obstacles, OBSTACLES_NUMBER, Xpos, BALL_Y, BALL_RAY))
 		  	  {
-		  		  tryb=0;
+		  		  tryb=3;
 		  		  HAL_Delay(2000);
 		  	  }
 		  	 if(IfScore(point, POINTS_NUMBER, Xpos, BALL_Y, BALL_RAY))
@@ -281,6 +281,17 @@ int main(void)
 
 		  break;
 	  case 3:
+		  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+		  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-30, (uint8_t*)"MALA",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2, (uint8_t*)"KOLIZJA",CENTER_MODE);
+
+		  ReloadFlag = 0;
+ 		  BSP_LCD_Relaod(LCD_RELOAD_VERTICAL_BLANKING);
+		  while(ReloadFlag == 0) {} /* wait till reload takes effect */
+		  HAL_Delay(1500);
+		  BSP_LCD_Clear(LCD_COLOR_BLACK);
+		  tryb=5;
 		  break;
 	  case 4:
 		  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
@@ -292,8 +303,21 @@ int main(void)
 		  ReloadFlag = 0;
 		  BSP_LCD_Relaod(LCD_RELOAD_VERTICAL_BLANKING);
 		  while(ReloadFlag == 0) {} /* wait till reload takes effect */
-		  HAL_Delay(10);
+		  HAL_Delay(1500);
 		  BSP_LCD_Clear(LCD_COLOR_BLACK);
+		  tryb=5;
+		  break;
+	  case 5:
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-30, (uint8_t*)"SPROBUJ",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2, (uint8_t*)"JESZCZE",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+30, (uint8_t*)"RAZ",CENTER_MODE);
+
+		  ReloadFlag = 0;
+		  BSP_LCD_Relaod(LCD_RELOAD_VERTICAL_BLANKING);
+		  while(ReloadFlag == 0) {} /* wait till reload takes effect */
+		  HAL_Delay(1500);
+		  BSP_LCD_Clear(LCD_COLOR_BLACK);
+		  tryb=0;
 		  break;
 	  }
 	  }
