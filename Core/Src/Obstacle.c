@@ -218,25 +218,25 @@ int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X_
 
 		if(length(obstacle[i].Xpos - X_ball							, obstacle[i].Ypos - Y_ball) 							< Ray)
 		{
-			BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2, (uint8_t*)"1", CENTER_MODE);
+			//BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2, (uint8_t*)"1", CENTER_MODE);
 			return 1;
 		}
 
 		if(length(obstacle[i].Xpos + obstacle[i].Width - X_ball		, obstacle[i].Ypos - Y_ball)							< Ray)
 		{
-			BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2, (uint8_t*)"2", CENTER_MODE);
+			//BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2, (uint8_t*)"2", CENTER_MODE);
 			return 1;
 		}
 
 		if(length(obstacle[i].Xpos - X_ball							, obstacle[i].Ypos + obstacle[i].Height - Y_ball)		< Ray)
 		{
-			BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2, (uint8_t*)"3", CENTER_MODE);
+			//BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2, (uint8_t*)"3", CENTER_MODE);
 			return 1;
 		}
 
 		if(length(obstacle[i].Xpos + obstacle[i].Width - X_ball		, obstacle[i].Ypos + obstacle[i].Height - Y_ball) 		< Ray)
 		{
-			BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2, (uint8_t*)"4", CENTER_MODE);
+			//BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2, (uint8_t*)"4", CENTER_MODE);
 			return 1;
 		}
 
@@ -244,7 +244,7 @@ int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X_
 		{
 			if(X_ball > obstacle[i].Xpos && X_ball < obstacle[i].Xpos + obstacle[i].Width)
 			{
-				BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2, (uint8_t*)"5", CENTER_MODE);
+				//BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2, (uint8_t*)"5", CENTER_MODE);
 				return 1;
 			}
 		}
