@@ -18,19 +18,19 @@ void Item_Init(Item *point, int16_t X, int16_t Y, uint16_t width, uint16_t heigh
 	point->Height = height;
 }
 
-void Item_Overflow(Item *point, uint8_t NumberOfObjects)
+void Item_Overflow(Item *point, uint8_t NumberOfPoints)
 {
-	for(uint8_t i = 0; i < NumberOfObjects; ++i)
+	for(uint8_t i = 0; i < NumberOfPoints; ++i)
 	{
 		if(point[i].Ypos <= 0)
 			point[i].Ypos = BSP_LCD_GetYSize() - point[i].Height;
 	}
 }
 
-void Item_OverflowRandom(Item *point, uint8_t NumberOfObjects, uint16_t width_limit)
+void Item_OverflowRandom(Item *point, uint8_t NumberOfPoints, uint16_t width_limit)
 {
 	int16_t X, width;
-	for(uint8_t i = 0; i < NumberOfObjects; ++i)
+	for(uint8_t i = 0; i < NumberOfPoints; ++i)
 	{
 		if(point[i].Ypos <= 0)
 		{
@@ -50,10 +50,10 @@ void Item_OverflowRandom(Item *point, uint8_t NumberOfObjects, uint16_t width_li
 	}
 }
 
-void ParityItem_OverflowRandom(Item *point, uint8_t NumberOfObjects, uint16_t width_limit)
+void ParityItem_OverflowRandom(Item *point, uint8_t NumberOfPoints, uint16_t width_limit)
 {
 	uint16_t width;
-	for(uint8_t i = 0; i < NumberOfObjects; ++i)
+	for(uint8_t i = 0; i < NumberOfPoints; ++i)
 	{
 		if(point[i].Ypos <= 0)
 		{
@@ -78,9 +78,9 @@ void SingleItem_Move(Item *point, int16_t X, int16_t Y)
 	point->Ypos += Y;
 }
 
-void MultiItem_Move(Item *point, uint8_t NumberOfObjects, int16_t X, int16_t Y)
+void MultiItem_Move(Item *point, uint8_t NumberOfPoints, int16_t X, int16_t Y)
 {
-	for(uint8_t i = 0; i < NumberOfObjects; ++i)
+	for(uint8_t i = 0; i < NumberOfPoints; ++i)
 	{
 		SingleItem_Move(&point[i], X, Y);
 	}
@@ -88,16 +88,16 @@ void MultiItem_Move(Item *point, uint8_t NumberOfObjects, int16_t X, int16_t Y)
 
 void SingleItem_Draw(Item *point)
 {
-	BSP_LCD_SetTextColor(LCD_COLOR_BROWN);
+	BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
 	if(point->Ypos + point->Height <= BSP_LCD_GetYSize())
 		BSP_LCD_FillRect((uint16_t)point->Xpos, (uint16_t)point->Ypos, point->Width, point->Height);
 }
 
-void MultiItem_Draw(Item *point, uint8_t NumberOfObjects)
+void MultiItem_Draw(Item *point, uint8_t NumberOfPoints)
 {
-	BSP_LCD_SetTextColor(LCD_COLOR_BROWN);
+	BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
 
-	for(uint8_t i = 0; i < NumberOfObjects; ++i)
+	for(uint8_t i = 0; i < NumberOfPoints; ++i)
 	{
 		if(point[i].Ypos + point[i].Height <= BSP_LCD_GetYSize())
 			BSP_LCD_FillRect((uint16_t)point[i].Xpos, (uint16_t)point[i].Ypos, point[i].Width, point[i].Height);
@@ -109,10 +109,10 @@ int length_2(int16_t X, int16_t Y)
 	return sqrt( (X * X) + (Y * Y) );
 }
 
-int IfScore(Item *point, uint8_t NumberOfObjects, int16_t X_ball, int16_t Y_ball, uint16_t Ray)
+int IfScore(Item *point, uint8_t NumberOfPoints, int16_t X_ball, int16_t Y_ball, uint16_t Ray)
 {
 
-	for(uint8_t i = 0; i < NumberOfObjects; ++i)
+	for(uint8_t i = 0; i < NumberOfPoints; ++i)
 	{
 
 		if(length_2(point[i].Xpos - X_ball							, point[i].Ypos - Y_ball) 							< Ray)

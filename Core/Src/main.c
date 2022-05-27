@@ -27,6 +27,7 @@
 #include "stm32f429i_discovery_gyroscope.h"
 #include "FirstOrderIIR.h"
 #include "Obstacle.h"
+#include "punkty.h"
 //#include "st_logo1.h"
 //#include "st_logo2.h"
 //#include "Rectangle_2.h"
@@ -49,6 +50,8 @@
 #define DPS_SCALE_2000 0.070f
 #define DPS_SCALE_USER 0.00095f
 #define OBSTACLES_NUMBER 5
+#define POINTS_NUMBER 2
+
 
 #define BALL_Y 60
 #define BALL_RAY 15
@@ -96,12 +99,13 @@ static void MX_LTDC_Init(void);
 static void MX_SPI5_Init(void);
 static void MX_TIM6_Init(void);
 /* USER CODE BEGIN PFP */
-static void LCD_Config(void);
+//static void LCD_Config(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 static void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_t width_limit, uint16_t height_limit , uint16_t gap);
+static void Generate_Item(Item *point, uint8_t NumberOfPoints, uint16_t width, uint16_t height , uint16_t gap);
 /* USER CODE END 0 */
 
 /**
@@ -112,6 +116,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	ObstacleDef obstacles[OBSTACLES_NUMBER];
+	Item point[POINTS_NUMBER];
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -158,8 +163,14 @@ int main(void)
   float Xpos = BSP_LCD_GetXSize()/2;
   uint16_t width_limit = 80;
   uint16_t height_limit = 10;
+
+  uint16_t width = 10;
+  uint16_t height= 10;
+
   uint16_t gap = 60;
   Generate_Obstacles(obstacles, OBSTACLES_NUMBER, width_limit, height_limit , gap);
+  Generate_Item(point, POINTS_NUMBER, width, height, gap);
+
 
   HAL_TIM_Base_Start_IT(&htim6);
   /* USER CODE END 2 */
@@ -207,6 +218,7 @@ int main(void)
 		HAL_Delay(1000);
 
 		Generate_Obstacles(obstacles, OBSTACLES_NUMBER, width_limit, height_limit , gap);
+		Generate_Item(point, POINTS_NUMBER, width, height, gap);
 
 		tryb=2;
 		  break;
@@ -225,9 +237,16 @@ int main(void)
 
 	  //	  Obstacle_Overflow(obstacles, OBSTACLES_NUMBER);
 	  //	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
+
+		  	  ParityItem_OverflowRandom(point, POINTS_NUMBER, width_limit);
+		  	  MultiItem_Move(point, POINTS_NUMBER, 0, -1);
+		   	  MultiItem_Draw(point, POINTS_NUMBER);
+
+
 		  	  ParityObstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
 		  	  MultiObstacle_Move(obstacles, OBSTACLES_NUMBER, 0, -1);
 		  	  MultiObstacle_Draw(obstacles, OBSTACLES_NUMBER);
+
 
 		  	  BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
 		  	  BSP_LCD_FillCircle(Xpos, BALL_Y, BALL_RAY);
@@ -729,6 +748,31 @@ void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_
 	}
 }
 
+
+void Generate_Item(Item *point, uint8_t NumberOfPointss, uint16_t width_limit, uint16_t height_limit, uint16_t gap)
+{
+	int16_t X;
+	int16_t Y = BSP_LCD_GetYSize();
+	uint16_t width;
+
+	for(uint8_t i = 0; i < NumberOfPointss; ++i)
+	{
+		X = rand() % BSP_LCD_GetXSize() + 40;
+		Y += gap+10;
+
+		if(BSP_LCD_GetXSize() - X < 50)
+			width = BSP_LCD_GetXSize() - X;
+		else if(BSP_LCD_GetXSize() - X > BSP_LCD_GetXSize() - 50)
+		{
+			X = 0;
+			width = rand() % width_limit;
+		}
+		else
+			width = rand() % width_limit;
+		Item_Init(&point[i], X, Y, width, height_limit);
+	}
+}
+
 /**
   * @brief LCD Configuration.
   * @note  This function Configure the LTDC peripheral :
@@ -745,149 +789,149 @@ void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_
   * @retval
   *  None
   */
-static void LCD_Config(void)
-{
-  LTDC_LayerCfgTypeDef pLayerCfg;
-  LTDC_LayerCfgTypeDef pLayerCfg1;
-
-  /* Initialization of ILI9341 component*/
-  ili9341_Init();
-
-/* LTDC Initialization -------------------------------------------------------*/
-
-  /* Polarity configuration */
-  /* Initialize the horizontal synchronization polarity as active low */
-  LtdcHandle.Init.HSPolarity = LTDC_HSPOLARITY_AL;
-  /* Initialize the vertical synchronization polarity as active low */
-  LtdcHandle.Init.VSPolarity = LTDC_VSPOLARITY_AL;
-  /* Initialize the data enable polarity as active low */
-  LtdcHandle.Init.DEPolarity = LTDC_DEPOLARITY_AL;
-  /* Initialize the pixel clock polarity as input pixel clock */
-  LtdcHandle.Init.PCPolarity = LTDC_PCPOLARITY_IPC;
-
-  /* Timing configuration  (Typical configuration from ILI9341 datasheet)
-      HSYNC=10 (9+1)
-      HBP=20 (29-10+1)
-      ActiveW=240 (269-20-10+1)
-      HFP=10 (279-240-20-10+1)
-
-      VSYNC=2 (1+1)
-      VBP=2 (3-2+1)
-      ActiveH=320 (323-2-2+1)
-      VFP=4 (327-320-2-2+1)
-  */
-
-  /* Timing configuration */
-  /* Horizontal synchronization width = Hsync - 1 */
-  LtdcHandle.Init.HorizontalSync = 9;
-  /* Vertical synchronization height = Vsync - 1 */
-  LtdcHandle.Init.VerticalSync = 1;
-  /* Accumulated horizontal back porch = Hsync + HBP - 1 */
-  LtdcHandle.Init.AccumulatedHBP = 29;
-  /* Accumulated vertical back porch = Vsync + VBP - 1 */
-  LtdcHandle.Init.AccumulatedVBP = 3;
-  /* Accumulated active width = Hsync + HBP + Active Width - 1 */
-  LtdcHandle.Init.AccumulatedActiveH = 323;
-  /* Accumulated active height = Vsync + VBP + Active Heigh - 1 */
-  LtdcHandle.Init.AccumulatedActiveW = 269;
-  /* Total height = Vsync + VBP + Active Heigh + VFP - 1 */
-  LtdcHandle.Init.TotalHeigh = 327;
-  /* Total width = Hsync + HBP + Active Width + HFP - 1 */
-  LtdcHandle.Init.TotalWidth = 279;
-
-  /* Configure R,G,B component values for LCD background color */
-  LtdcHandle.Init.Backcolor.Blue = 0;
-  LtdcHandle.Init.Backcolor.Green = 0;
-  LtdcHandle.Init.Backcolor.Red = 0;
-
-  LtdcHandle.Instance = LTDC;
-
-/* Layer1 Configuration ------------------------------------------------------*/
-
-  /* Windowing configuration */
-  pLayerCfg.WindowX0 = 0;
-  pLayerCfg.WindowX1 = BSP_LCD_GetXSize();
-  pLayerCfg.WindowY0 = 0;
-  pLayerCfg.WindowY1 = BSP_LCD_GetYSize();
-
-  /* Pixel Format configuration*/
-
-//  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
-  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_ARGB8888;
-  /* Start Address configuration : frame buffer is located at FLASH memory */
-  //pLayerCfg.FBStartAdress = (uint32_t)&ST_LOGO_1;
-  pLayerCfg.FBStartAdress=0xD0000000;
-
-  /* Alpha constant (255 totally opaque) */
-  pLayerCfg.Alpha = 255;
-
-  /* Default Color configuration (configure A,R,G,B component values) */
-  pLayerCfg.Alpha0 = 0;
-  pLayerCfg.Backcolor.Blue = 0;
-  pLayerCfg.Backcolor.Green = 0;
-  pLayerCfg.Backcolor.Red = 0;
-
-  /* Configure blending factors */
-  pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_PAxCA;
-  pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_PAxCA;
-
-  /* Configure the number of lines and number of pixels per line */
-  pLayerCfg.ImageWidth = BSP_LCD_GetXSize();
-  pLayerCfg.ImageHeight = BSP_LCD_GetYSize() ;
-
-/* Layer2 Configuration ------------------------------------------------------*/
-
-  /* Windowing configuration */
-  pLayerCfg1.WindowX0 = 0;
-  pLayerCfg1.WindowX1 = BSP_LCD_GetXSize();
-  pLayerCfg1.WindowY0 = 0;
-  pLayerCfg1.WindowY1 = BSP_LCD_GetYSize();
-
-  /* Pixel Format configuration*/
-//  pLayerCfg1.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
-  pLayerCfg1.PixelFormat =LTDC_PIXEL_FORMAT_ARGB8888;
-  /* Start Address configuration : frame buffer is located at FLASH memory */
- // pLayerCfg1.FBStartAdress = (uint32_t)&ST_LOGO_2;
-  pLayerCfg1.FBStartAdress =0xD0000000;
-
-  /* Alpha constant (255 totally opaque) */
-  pLayerCfg1.Alpha = 200;
-
-  /* Default Color configuration (configure A,R,G,B component values) */
-  pLayerCfg1.Alpha0 = 0;
-  pLayerCfg1.Backcolor.Blue = 0;
-  pLayerCfg1.Backcolor.Green = 0;
-  pLayerCfg1.Backcolor.Red = 0;
-
+//static void LCD_Config(void)
+//{
+//  LTDC_LayerCfgTypeDef pLayerCfg;
+//  LTDC_LayerCfgTypeDef pLayerCfg1;
+//
+//  /* Initialization of ILI9341 component*/
+//  ili9341_Init();
+//
+///* LTDC Initialization -------------------------------------------------------*/
+//
+//  /* Polarity configuration */
+//  /* Initialize the horizontal synchronization polarity as active low */
+//  LtdcHandle.Init.HSPolarity = LTDC_HSPOLARITY_AL;
+//  /* Initialize the vertical synchronization polarity as active low */
+//  LtdcHandle.Init.VSPolarity = LTDC_VSPOLARITY_AL;
+//  /* Initialize the data enable polarity as active low */
+//  LtdcHandle.Init.DEPolarity = LTDC_DEPOLARITY_AL;
+//  /* Initialize the pixel clock polarity as input pixel clock */
+//  LtdcHandle.Init.PCPolarity = LTDC_PCPOLARITY_IPC;
+//
+//  /* Timing configuration  (Typical configuration from ILI9341 datasheet)
+//      HSYNC=10 (9+1)
+//      HBP=20 (29-10+1)
+//      ActiveW=240 (269-20-10+1)
+//      HFP=10 (279-240-20-10+1)
+//
+//      VSYNC=2 (1+1)
+//      VBP=2 (3-2+1)
+//      ActiveH=320 (323-2-2+1)
+//      VFP=4 (327-320-2-2+1)
+//  */
+//
+//  /* Timing configuration */
+//  /* Horizontal synchronization width = Hsync - 1 */
+//  LtdcHandle.Init.HorizontalSync = 9;
+//  /* Vertical synchronization height = Vsync - 1 */
+//  LtdcHandle.Init.VerticalSync = 1;
+//  /* Accumulated horizontal back porch = Hsync + HBP - 1 */
+//  LtdcHandle.Init.AccumulatedHBP = 29;
+//  /* Accumulated vertical back porch = Vsync + VBP - 1 */
+//  LtdcHandle.Init.AccumulatedVBP = 3;
+//  /* Accumulated active width = Hsync + HBP + Active Width - 1 */
+//  LtdcHandle.Init.AccumulatedActiveH = 323;
+//  /* Accumulated active height = Vsync + VBP + Active Heigh - 1 */
+//  LtdcHandle.Init.AccumulatedActiveW = 269;
+//  /* Total height = Vsync + VBP + Active Heigh + VFP - 1 */
+//  LtdcHandle.Init.TotalHeigh = 327;
+//  /* Total width = Hsync + HBP + Active Width + HFP - 1 */
+//  LtdcHandle.Init.TotalWidth = 279;
+//
+//  /* Configure R,G,B component values for LCD background color */
+//  LtdcHandle.Init.Backcolor.Blue = 0;
+//  LtdcHandle.Init.Backcolor.Green = 0;
+//  LtdcHandle.Init.Backcolor.Red = 0;
+//
+//  LtdcHandle.Instance = LTDC;
+//
+///* Layer1 Configuration ------------------------------------------------------*/
+//
+//  /* Windowing configuration */
+//  pLayerCfg.WindowX0 = 0;
+//  pLayerCfg.WindowX1 = BSP_LCD_GetXSize();
+//  pLayerCfg.WindowY0 = 0;
+//  pLayerCfg.WindowY1 = BSP_LCD_GetYSize();
+//
+//  /* Pixel Format configuration*/
+//
+////  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
+//  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_ARGB8888;
+//  /* Start Address configuration : frame buffer is located at FLASH memory */
+//  //pLayerCfg.FBStartAdress = (uint32_t)&ST_LOGO_1;
+//  pLayerCfg.FBStartAdress=0xD0000000;
+//
+//  /* Alpha constant (255 totally opaque) */
+//  pLayerCfg.Alpha = 255;
+//
+//  /* Default Color configuration (configure A,R,G,B component values) */
+//  pLayerCfg.Alpha0 = 0;
+//  pLayerCfg.Backcolor.Blue = 0;
+//  pLayerCfg.Backcolor.Green = 0;
+//  pLayerCfg.Backcolor.Red = 0;
+//
 //  /* Configure blending factors */
-  pLayerCfg1.BlendingFactor1 = LTDC_BLENDING_FACTOR1_PAxCA;
-  pLayerCfg1.BlendingFactor2 = LTDC_BLENDING_FACTOR2_PAxCA;
-
-  /* Configure the number of lines and number of pixels per line */
-  pLayerCfg1.ImageWidth = BSP_LCD_GetXSize();
-  pLayerCfg1.ImageHeight = BSP_LCD_GetYSize();
-
-  /* Configure the LTDC */
-  if(HAL_LTDC_Init(&LtdcHandle) != HAL_OK)
-  {
-    /* Initialization Error */
-    Error_Handler();
-  }
-
-  /* Configure the Background Layer*/
-  if(HAL_LTDC_ConfigLayer(&LtdcHandle, &pLayerCfg, 0) != HAL_OK)
-  {
-    /* Initialization Error */
-    Error_Handler();
-  }
-
-  /* Configure the Foreground Layer*/
-  if(HAL_LTDC_ConfigLayer(&LtdcHandle, &pLayerCfg1, 1) != HAL_OK)
-  {
-    /* Initialization Error */
-    Error_Handler();
-  }
-}
+//  pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_PAxCA;
+//  pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_PAxCA;
+//
+//  /* Configure the number of lines and number of pixels per line */
+//  pLayerCfg.ImageWidth = BSP_LCD_GetXSize();
+//  pLayerCfg.ImageHeight = BSP_LCD_GetYSize() ;
+//
+///* Layer2 Configuration ------------------------------------------------------*/
+//
+//  /* Windowing configuration */
+//  pLayerCfg1.WindowX0 = 0;
+//  pLayerCfg1.WindowX1 = BSP_LCD_GetXSize();
+//  pLayerCfg1.WindowY0 = 0;
+//  pLayerCfg1.WindowY1 = BSP_LCD_GetYSize();
+//
+//  /* Pixel Format configuration*/
+////  pLayerCfg1.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
+//  pLayerCfg1.PixelFormat =LTDC_PIXEL_FORMAT_ARGB8888;
+//  /* Start Address configuration : frame buffer is located at FLASH memory */
+// // pLayerCfg1.FBStartAdress = (uint32_t)&ST_LOGO_2;
+//  pLayerCfg1.FBStartAdress =0xD0000000;
+//
+//  /* Alpha constant (255 totally opaque) */
+//  pLayerCfg1.Alpha = 200;
+//
+//  /* Default Color configuration (configure A,R,G,B component values) */
+//  pLayerCfg1.Alpha0 = 0;
+//  pLayerCfg1.Backcolor.Blue = 0;
+//  pLayerCfg1.Backcolor.Green = 0;
+//  pLayerCfg1.Backcolor.Red = 0;
+//
+////  /* Configure blending factors */
+//  pLayerCfg1.BlendingFactor1 = LTDC_BLENDING_FACTOR1_PAxCA;
+//  pLayerCfg1.BlendingFactor2 = LTDC_BLENDING_FACTOR2_PAxCA;
+//
+//  /* Configure the number of lines and number of pixels per line */
+//  pLayerCfg1.ImageWidth = BSP_LCD_GetXSize();
+//  pLayerCfg1.ImageHeight = BSP_LCD_GetYSize();
+//
+//  /* Configure the LTDC */
+//  if(HAL_LTDC_Init(&LtdcHandle) != HAL_OK)
+//  {
+//    /* Initialization Error */
+//    Error_Handler();
+//  }
+//
+//  /* Configure the Background Layer*/
+//  if(HAL_LTDC_ConfigLayer(&LtdcHandle, &pLayerCfg, 0) != HAL_OK)
+//  {
+//    /* Initialization Error */
+//    Error_Handler();
+//  }
+//
+//  /* Configure the Foreground Layer*/
+//  if(HAL_LTDC_ConfigLayer(&LtdcHandle, &pLayerCfg1, 1) != HAL_OK)
+//  {
+//    /* Initialization Error */
+//    Error_Handler();
+//  }
+//}
 
 /**
   * @brief  Reload Event callback.
