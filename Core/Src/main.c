@@ -105,6 +105,7 @@ static void MX_TIM6_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+static void zmien_na_char(int pom);
 static void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_t width_limit, uint16_t height_limit , uint16_t gap);
 static void Generate_Item(Item *point, uint8_t NumberOfPoints, uint16_t width, uint16_t height , uint16_t gap);
 /* USER CODE END 0 */
@@ -228,8 +229,9 @@ int main(void)
 
 		  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
 		  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
-		  char pom=punkty+'0';
-		  BSP_LCD_DisplayChar(200,50,pom);
+
+		  zmien_na_char(punkty);
+
 		  if(gyro_flag == 1)
 		  	  {
 		  		  gyro_flag = 0;
@@ -733,6 +735,60 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void zmien_na_char(int pom)
+{
+	if(pom<10)
+	{
+		char punkty=pom+'0';
+		BSP_LCD_DisplayChar(200,50,punkty);
+	}
+	else
+	{
+		if(pom<20)
+		{
+			pom=pom%10;
+			char punkty=pom+'0';
+			char jeden=1+'0';
+			BSP_LCD_DisplayChar(200,50,jeden);
+			BSP_LCD_DisplayChar(215,50,punkty);
+		}
+		else
+		{
+			if(pom<30)
+			{
+				pom=pom%10;
+				char punkty=pom+'0';
+				char dwa=2 +'0';
+				BSP_LCD_DisplayChar(200,50,dwa);
+				BSP_LCD_DisplayChar(215,50,punkty);
+			}
+			else
+			{
+				if(pom<40)
+				{
+					pom=pom%10;
+					char punkty=pom+'0';
+					char trzy=3 +'0';
+					BSP_LCD_DisplayChar(200,50,trzy);
+					BSP_LCD_DisplayChar(215,50,punkty);
+				}
+				else
+				{
+					if(pom<50)
+					{
+						pom=pom%10;
+						char punkty=pom+'0';
+						char cztery=4 +'0';
+						BSP_LCD_DisplayChar(200,50,cztery);
+						BSP_LCD_DisplayChar(215,50,punkty);
+					}
+				}
+			}
+		}
+	}
+
+}
 
 void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_t width_limit, uint16_t height_limit, uint16_t gap)
 {
