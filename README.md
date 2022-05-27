@@ -10,11 +10,11 @@ STM32F429I-DISCO1, gyroscope and lcd
 - Implemented first order high-pass filter
 - Collisions
 - Start and Reset
+- Game rules
+- Refine restart and draw generate new obstacles
 
 # To do
 - Work with layers
-- Game rules
-- Refine restart and draw generate new obstacles
 
 
 # Libraries
