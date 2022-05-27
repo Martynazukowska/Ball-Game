@@ -53,7 +53,7 @@
 #define POINTS_NUMBER 2
 
 
-#define BALL_Y 60
+#define BALL_Y 80
 #define BALL_RAY 15
 
 /* USER CODE END PD */
@@ -85,6 +85,7 @@ __IO uint32_t ReloadFlag = 0;
 __IO float X = 0;
 __IO int gyro_flag = 0;
 __IO int tryb = 0;
+__IO int punkty=0;
 FirstOrderIIR_t filter;
 
 /* USER CODE END PV */
@@ -199,6 +200,7 @@ int main(void)
 		  while(ReloadFlag == 0) {} /* wait till reload takes effect */
 		  HAL_Delay(10);
 		  BSP_LCD_Clear(LCD_COLOR_BLACK);
+		  punkty=0;
 		  break;
 	  case 1:
 		BSP_LCD_Clear(LCD_COLOR_BLACK);
@@ -224,6 +226,10 @@ int main(void)
 		  break;
 	  case 2:
 
+		  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+		  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
+		  char pom=punkty+'0';
+		  BSP_LCD_DisplayChar(200,50,pom);
 		  if(gyro_flag == 1)
 		  	  {
 		  		  gyro_flag = 0;
@@ -256,6 +262,10 @@ int main(void)
 		  		  tryb=0;
 		  		  HAL_Delay(2000);
 		  	  }
+		  	 if(IfScore(point, POINTS_NUMBER, Xpos, BALL_Y, BALL_RAY))
+		  	 {
+		  		 punkty=punkty+1;
+		  	 }
 
 		  	  ReloadFlag = 0;
 		  	  BSP_LCD_Relaod(LCD_RELOAD_VERTICAL_BLANKING);

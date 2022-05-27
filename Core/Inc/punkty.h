@@ -18,6 +18,7 @@ typedef struct
 	int16_t Ypos;
 	uint16_t Width;
 	uint16_t Height;
+	int16_t zdobyty;
 }Item;
 
 
