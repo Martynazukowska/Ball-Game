@@ -118,31 +118,31 @@ int IfScore(Item *point, uint8_t NumberOfPoints, int16_t X_ball, int16_t Y_ball,
 	for(uint8_t i = 0; i < NumberOfPoints; ++i)
 	{
 
-		if(length_2(point[i].Xpos - X_ball							, point[i].Ypos - Y_ball) 							< Ray)
+		if(point[i].zdobyty==0 && length_2(point[i].Xpos - X_ball							, point[i].Ypos - Y_ball) 							< Ray)
 		{
 			point[i].zdobyty=1;
 			return 1;
 		}
 
-		if(length_2(point[i].Xpos + point[i].Width - X_ball		, point[i].Ypos - Y_ball)							< Ray)
+		if(point[i].zdobyty==0 && length_2(point[i].Xpos + point[i].Width - X_ball		, point[i].Ypos - Y_ball)							< Ray)
 		{
 			point[i].zdobyty=1;
 			return 1;
 		}
 
-		if(length_2(point[i].Xpos - X_ball							, point[i].Ypos + point[i].Height - Y_ball)		< Ray)
+		if(point[i].zdobyty==0 && length_2(point[i].Xpos - X_ball							, point[i].Ypos + point[i].Height - Y_ball)		< Ray)
 		{
 			point[i].zdobyty=1;
 			return 1;
 		}
 
-		if(length_2(point[i].Xpos + point[i].Width - X_ball		, point[i].Ypos + point[i].Height - Y_ball) 		< Ray)
+		if(point[i].zdobyty==0 && length_2(point[i].Xpos + point[i].Width - X_ball		, point[i].Ypos + point[i].Height - Y_ball) 		< Ray)
 		{
 			point[i].zdobyty=1;
 			return 1;
 		}
 
-		if(Y_ball + Ray > point[i].Ypos && Y_ball - Ray < point[i].Ypos)
+		if(point[i].zdobyty==0 && Y_ball + Ray > point[i].Ypos && Y_ball - Ray < point[i].Ypos)
 		{
 			if(X_ball > point[i].Xpos && X_ball < point[i].Xpos + point[i].Width)
 			{
