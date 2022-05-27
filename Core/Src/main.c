@@ -758,17 +758,17 @@ void Generate_Item(Item *point, uint8_t NumberOfPointss, uint16_t width_limit, u
 	for(uint8_t i = 0; i < NumberOfPointss; ++i)
 	{
 		X = rand() % BSP_LCD_GetXSize() + 40;
-		Y += gap+10;
+		Y += gap+30;
 
 		if(BSP_LCD_GetXSize() - X < 50)
-			width = BSP_LCD_GetXSize() - X;
+			width = 10;
 		else if(BSP_LCD_GetXSize() - X > BSP_LCD_GetXSize() - 50)
 		{
 			X = 0;
-			width = rand() % width_limit;
+			width = 10;
 		}
 		else
-			width = rand() % width_limit;
+			width = 10;
 		Item_Init(&point[i], X, Y, width, height_limit);
 	}
 }

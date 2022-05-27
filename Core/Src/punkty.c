@@ -37,14 +37,9 @@ void Item_OverflowRandom(Item *point, uint8_t NumberOfPoints, uint16_t width_lim
 			point[i].Ypos = BSP_LCD_GetYSize() - point[i].Height;
 			X = rand() % width_limit + 40;
 			if(BSP_LCD_GetXSize() - X < 50)
-				width = BSP_LCD_GetXSize() - X;
-			else if(BSP_LCD_GetXSize() - X > BSP_LCD_GetXSize() - 50)
-			{
-				X = 0;
-				width = rand() % width_limit;
-			}
+				width = 10;
 			else
-				width = rand() % width_limit;
+				width =10;
 			Item_Init(&point[i], X, point[i].Ypos, width, point[i].Height);
 		}
 	}
@@ -52,21 +47,22 @@ void Item_OverflowRandom(Item *point, uint8_t NumberOfPoints, uint16_t width_lim
 
 void ParityItem_OverflowRandom(Item *point, uint8_t NumberOfPoints, uint16_t width_limit)
 {
-	uint16_t width;
+	uint16_t width,X;
 	for(uint8_t i = 0; i < NumberOfPoints; ++i)
 	{
+		X = rand() % width_limit + 40;
 		if(point[i].Ypos <= 0)
 		{
 			point[i].Ypos = BSP_LCD_GetYSize() - point[i].Height;
 			if(i % 2 == 0)
 			{
-				width = (rand() % width_limit) + 20;
-				Item_Init(&point[i], 0, point[i].Ypos, width, point[i].Height);
+				width = 10;
+				Item_Init(&point[i], X, point[i].Ypos, width, point[i].Height);
 			}
 			else
 			{
-				width = (rand() % width_limit) + 20;
-				Item_Init(&point[i], BSP_LCD_GetXSize() - width, point[i].Ypos, width, point[i].Height);
+				width = 10;
+				Item_Init(&point[i], BSP_LCD_GetXSize() - width - X, point[i].Ypos, width, point[i].Height);
 			}
 		}
 	}
