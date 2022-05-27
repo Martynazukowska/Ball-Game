@@ -268,12 +268,32 @@ int main(void)
 		  	 {
 		  		 punkty=punkty+1;
 		  	 }
+		  	 if(punkty==50)
+		  	 {
+		  		tryb=4;
+		  		HAL_Delay(500);
+		  	  }
 
 		  	  ReloadFlag = 0;
 		  	  BSP_LCD_Relaod(LCD_RELOAD_VERTICAL_BLANKING);
 		  	  while(ReloadFlag == 0) {} /* wait till reload takes effect */
 		  	  BSP_LCD_Clear(LCD_COLOR_BLACK);
 
+		  break;
+	  case 3:
+		  break;
+	  case 4:
+		  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+		  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-30, (uint8_t*)"GRATULACJE",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2, (uint8_t*)"POKONALES",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+30, (uint8_t*)"MNIE",CENTER_MODE);
+
+		  ReloadFlag = 0;
+		  BSP_LCD_Relaod(LCD_RELOAD_VERTICAL_BLANKING);
+		  while(ReloadFlag == 0) {} /* wait till reload takes effect */
+		  HAL_Delay(10);
+		  BSP_LCD_Clear(LCD_COLOR_BLACK);
 		  break;
 	  }
 	  }
