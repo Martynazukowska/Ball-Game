@@ -2,7 +2,7 @@
  * Obstacle.h
  *
  *  Created on: 16 maj 2022
- *      Author: Dawid Łukasiewicz
+ *      Author: Dawid Łukasiewicz and Martyna Żukowska
  */
 #include <stdlib.h>
 #include <time.h>
@@ -13,6 +13,7 @@
 
 /**
  * @brief struct of an obstacle
+
  * @det has X, Y beginnig positions, width and height
  */
 typedef struct
@@ -38,10 +39,10 @@ void SingleObstacle_Move(ObstacleDef *obstacle, int16_t X, int16_t Y);
 
 void MultiObstacle_Move(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X, int16_t Y);
 
-int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects);
-
 void SingleObstacle_Draw(ObstacleDef *obstacle);
 
 void MultiObstacle_Draw(ObstacleDef *obstacle, uint8_t NumberOfObjects);
+
+int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X_ball, int16_t Y_ball, uint16_t Ray);
 
 #endif /* INC_OBSTACLE_H_ */
