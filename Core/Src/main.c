@@ -201,7 +201,7 @@ int main(void)
 		  while(ReloadFlag == 0) {} /* wait till reload takes effect */
 		  HAL_Delay(10);
 		  BSP_LCD_Clear(LCD_COLOR_BLACK);
-		  punkty=45;
+		  punkty=0;
 		  break;
 	  case 1:
 		BSP_LCD_Clear(LCD_COLOR_BLACK);
