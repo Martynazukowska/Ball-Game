@@ -17,6 +17,11 @@ void Item_Init(Item *point, int16_t X, int16_t Y, uint16_t width, uint16_t heigh
 	point->Width = width;
 	point->Height = height;
 	point->zdobyty=0;
+	point->specjalny=0;
+	int pom;
+	pom=rand()%2;
+	if(pom==1)
+	point->specjalny=1;
 }
 
 void Item_Overflow(Item *point, uint8_t NumberOfPoints)
@@ -59,11 +64,24 @@ void ParityItem_OverflowRandom(Item *point, uint8_t NumberOfPoints, uint16_t wid
 			{
 				width = 10;
 				Item_Init(&point[i], X, point[i].Ypos, width, point[i].Height);
+//				int pom;
+//				pom=rand()%2;
+//				if(pom==0)
+//				{
+//					point[i].specjalny=1;
+//				}
+
 			}
 			else
 			{
 				width = 10;
 				Item_Init(&point[i], BSP_LCD_GetXSize() - width - X, point[i].Ypos, width, point[i].Height);
+//				int pom;
+//				pom=rand()%2;
+//				if(pom==0)
+//				{
+//					point[i].specjalny=1;
+//				}
 			}
 		}
 	}
@@ -85,7 +103,10 @@ void MultiItem_Move(Item *point, uint8_t NumberOfPoints, int16_t X, int16_t Y)
 
 void SingleItem_Draw(Item *point)
 {
-	BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
+	if(point->specjalny==1)
+		BSP_LCD_SetTextColor(LCD_COLOR_CYAN);
+	else
+		BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
 	if(point->zdobyty==0)
 	{
 		if(point->Ypos + point->Height <= BSP_LCD_GetYSize())
@@ -95,10 +116,13 @@ void SingleItem_Draw(Item *point)
 
 void MultiItem_Draw(Item *point, uint8_t NumberOfPoints)
 {
-	BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
 
 	for(uint8_t i = 0; i < NumberOfPoints; ++i)
 	{
+		if(point[i].specjalny==1)
+					BSP_LCD_SetTextColor(LCD_COLOR_CYAN);
+		if(point[i].specjalny==0)
+					BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
 		if(point[i].zdobyty==0)
 		{
 			if(point[i].Ypos + point[i].Height <= BSP_LCD_GetYSize())
@@ -121,25 +145,37 @@ int IfScore(Item *point, uint8_t NumberOfPoints, int16_t X_ball, int16_t Y_ball,
 		if(point[i].zdobyty==0 && length_2(point[i].Xpos - X_ball							, point[i].Ypos - Y_ball) 							< Ray)
 		{
 			point[i].zdobyty=1;
-			return 1;
+			if(point[i].specjalny==1)
+						return 5;
+			else
+						return 1;
 		}
 
 		if(point[i].zdobyty==0 && length_2(point[i].Xpos + point[i].Width - X_ball		, point[i].Ypos - Y_ball)							< Ray)
 		{
 			point[i].zdobyty=1;
-			return 1;
+			if(point[i].specjalny==1)
+				return 5;
+			else
+				return 1;
 		}
 
 		if(point[i].zdobyty==0 && length_2(point[i].Xpos - X_ball							, point[i].Ypos + point[i].Height - Y_ball)		< Ray)
 		{
 			point[i].zdobyty=1;
-			return 1;
+			if(point[i].specjalny==1)
+				return 5;
+			else
+				return 1;
 		}
 
 		if(point[i].zdobyty==0 && length_2(point[i].Xpos + point[i].Width - X_ball		, point[i].Ypos + point[i].Height - Y_ball) 		< Ray)
 		{
 			point[i].zdobyty=1;
-			return 1;
+			if(point[i].specjalny==1)
+				return 5;
+			else
+				return 1;
 		}
 
 		if(point[i].zdobyty==0 && Y_ball + Ray > point[i].Ypos && Y_ball - Ray < point[i].Ypos)
@@ -147,7 +183,10 @@ int IfScore(Item *point, uint8_t NumberOfPoints, int16_t X_ball, int16_t Y_ball,
 			if(X_ball > point[i].Xpos && X_ball < point[i].Xpos + point[i].Width)
 			{
 				point[i].zdobyty=1;
-				return 1;
+				if(point[i].specjalny==1)
+					return 5;
+				else
+					return 1;
 			}
 		}
 	}

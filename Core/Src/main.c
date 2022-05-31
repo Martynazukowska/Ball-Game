@@ -264,11 +264,11 @@ int main(void)
 		  		  tryb=3;
 		  		  HAL_Delay(2000);
 		  	  }
-		  	 if(IfScore(point, POINTS_NUMBER, Xpos, BALL_Y, BALL_RAY))
-		  	 {
-		  		 punkty=punkty+1;
-		  	 }
-		  	 if(punkty==50)
+		  	  int score;
+		  	  score=IfScore(point, POINTS_NUMBER, Xpos, BALL_Y, BALL_RAY);
+		  	  punkty=punkty+score;
+
+		  	 if(punkty>=50)
 		  	 {
 		  		tryb=4;
 		  		HAL_Delay(500);
@@ -871,7 +871,7 @@ void Generate_Item(Item *point, uint8_t NumberOfPointss, uint16_t width_limit, u
 		random=rand()%2;
 		random=random+1;
 		X = rand() % BSP_LCD_GetXSize() + 40;
-		Y += (random*gap)+30;
+		Y += (random*gap)+15;
 
 		if(BSP_LCD_GetXSize() - X < 50)
 			width = 10;

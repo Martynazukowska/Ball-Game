@@ -19,6 +19,7 @@ typedef struct
 	uint16_t Width;
 	uint16_t Height;
 	int16_t zdobyty;
+	int specjalny;
 }Item;
 
 
