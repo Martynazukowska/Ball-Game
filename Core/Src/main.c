@@ -105,7 +105,7 @@ static void MX_TIM6_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-static void zmien_na_char(int pom);
+static void zmien_na_char(int pom,int x, int y);
 static void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_t width_limit, uint16_t height_limit , uint16_t gap);
 static void Generate_Item(Item *point, uint8_t NumberOfPoints, uint16_t width, uint16_t height , uint16_t gap);
 /* USER CODE END 0 */
@@ -230,7 +230,7 @@ int main(void)
 		  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
 		  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
 
-		  zmien_na_char(punkty);
+		  zmien_na_char(punkty,200,50);
 
 		  if(gyro_flag == 1)
 		  	  {
@@ -308,14 +308,20 @@ int main(void)
 		  tryb=5;
 		  break;
 	  case 5:
-		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-30, (uint8_t*)"SPROBUJ",CENTER_MODE);
-		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2, (uint8_t*)"JESZCZE",CENTER_MODE);
-		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+30, (uint8_t*)"RAZ",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-120, (uint8_t*)"---------------",LEFT_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-100, (uint8_t*)"Twoj Wynik",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-79, (uint8_t*)"---------------",LEFT_MODE);
+
+		  zmien_na_char(punkty,BSP_LCD_GetXSize()/2,BSP_LCD_GetYSize()/2-45);
+
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+20, (uint8_t*)"---------------",LEFT_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+41, (uint8_t*)"Best score",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+61, (uint8_t*)"---------------",LEFT_MODE);
 
 		  ReloadFlag = 0;
 		  BSP_LCD_Relaod(LCD_RELOAD_VERTICAL_BLANKING);
 		  while(ReloadFlag == 0) {} /* wait till reload takes effect */
-		  HAL_Delay(1500);
+		  HAL_Delay(4000);
 		  BSP_LCD_Clear(LCD_COLOR_BLACK);
 		  tryb=0;
 		  break;
@@ -780,12 +786,12 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void zmien_na_char(int pom)
+void zmien_na_char(int pom,int x,int y)
 {
 	if(pom<10)
 	{
 		char punkty=pom+'0';
-		BSP_LCD_DisplayChar(200,50,punkty);
+		BSP_LCD_DisplayChar(x,y,punkty);
 	}
 	else
 	{
@@ -794,8 +800,8 @@ void zmien_na_char(int pom)
 			pom=pom%10;
 			char punkty=pom+'0';
 			char jeden=1+'0';
-			BSP_LCD_DisplayChar(200,50,jeden);
-			BSP_LCD_DisplayChar(215,50,punkty);
+			BSP_LCD_DisplayChar(x,y,jeden);
+			BSP_LCD_DisplayChar(x+15,y,punkty);
 		}
 		else
 		{
@@ -804,8 +810,8 @@ void zmien_na_char(int pom)
 				pom=pom%10;
 				char punkty=pom+'0';
 				char dwa=2 +'0';
-				BSP_LCD_DisplayChar(200,50,dwa);
-				BSP_LCD_DisplayChar(215,50,punkty);
+				BSP_LCD_DisplayChar(x,y,dwa);
+				BSP_LCD_DisplayChar(x+15,y,punkty);
 			}
 			else
 			{
@@ -814,8 +820,8 @@ void zmien_na_char(int pom)
 					pom=pom%10;
 					char punkty=pom+'0';
 					char trzy=3 +'0';
-					BSP_LCD_DisplayChar(200,50,trzy);
-					BSP_LCD_DisplayChar(215,50,punkty);
+					BSP_LCD_DisplayChar(x,y,trzy);
+					BSP_LCD_DisplayChar(x+15,y,punkty);
 				}
 				else
 				{
@@ -824,8 +830,8 @@ void zmien_na_char(int pom)
 						pom=pom%10;
 						char punkty=pom+'0';
 						char cztery=4 +'0';
-						BSP_LCD_DisplayChar(200,50,cztery);
-						BSP_LCD_DisplayChar(215,50,punkty);
+						BSP_LCD_DisplayChar(x,y,cztery);
+						BSP_LCD_DisplayChar(x+15,y,punkty);
 					}
 				}
 			}
