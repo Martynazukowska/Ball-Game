@@ -23,7 +23,7 @@ int FirstOrderIIR_Init(FirstOrderIIR_t *filter, float alpha, float beta_0, float
 
 float FirstOrderIIR_Update(FirstOrderIIR_t *filter, float in)
 {
-	filter->out = filter->beta_0 + in + filter->beta_1 * filter->previous_in + filter->alpha * filter->out;
+	filter->out = filter->beta_0 * in + filter->beta_1 * filter->previous_in + filter->alpha * filter->out;
 	filter->previous_in = in;
 
 	return filter->out;
