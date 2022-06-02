@@ -134,6 +134,7 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
+  int MAX_PUNKTOW=0;
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
@@ -308,15 +309,21 @@ int main(void)
 		  tryb=5;
 		  break;
 	  case 5:
+		  if(punkty>=MAX_PUNKTOW)
+		  {
+			  MAX_PUNKTOW=punkty;
+		  }
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-120, (uint8_t*)"---------------",LEFT_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-100, (uint8_t*)"Twoj Wynik",CENTER_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-79, (uint8_t*)"---------------",LEFT_MODE);
 
-		  zmien_na_char(punkty,BSP_LCD_GetXSize()/2,BSP_LCD_GetYSize()/2-45);
+		  zmien_na_char(punkty,BSP_LCD_GetXSize()/2-20,BSP_LCD_GetYSize()/2-45);
 
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+20, (uint8_t*)"---------------",LEFT_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+41, (uint8_t*)"Best score",CENTER_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+61, (uint8_t*)"---------------",LEFT_MODE);
+
+		  zmien_na_char(MAX_PUNKTOW,BSP_LCD_GetXSize()/2-20,BSP_LCD_GetYSize()/2+95);
 
 		  ReloadFlag = 0;
 		  BSP_LCD_Relaod(LCD_RELOAD_VERTICAL_BLANKING);
