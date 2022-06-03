@@ -840,6 +840,17 @@ void zmien_na_char(int pom,int x,int y)
 						BSP_LCD_DisplayChar(x,y,cztery);
 						BSP_LCD_DisplayChar(x+15,y,punkty);
 					}
+					else
+					{
+						if(pom<60)
+						{
+							pom=pom%10;
+							char punkty=pom+'0';
+							char piec=5 +'0';
+							BSP_LCD_DisplayChar(x,y,piec);
+							BSP_LCD_DisplayChar(x+15,y,punkty);
+										}
+									}
 				}
 			}
 		}

@@ -19,7 +19,7 @@ void Item_Init(Item *point, int16_t X, int16_t Y, uint16_t width, uint16_t heigh
 	point->zdobyty=0;
 	point->specjalny=0;
 	int pom;
-	pom=rand()%2;
+	pom=rand()%4;
 	if(pom==1)
 	point->specjalny=1;
 }
