@@ -85,7 +85,8 @@ __IO uint32_t ReloadFlag = 0;
 __IO float X = 0;
 __IO int gyro_flag = 0;
 __IO int tryb = 0;
-__IO int punkty=0;
+__IO int punkty = 0;
+__IO uint16_t bestScore = 0;
 FirstOrderIIR_t filter;
 
 /* USER CODE END PV */
@@ -105,11 +106,11 @@ static void MX_TIM6_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-static void zmien_na_char(int pom,int x, int y);
+static void zmien_na_char(uint16_t pom,int x, int y);
 static void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_t width_limit, uint16_t height_limit , uint16_t gap);
 static void Generate_Item(Item *point, uint8_t NumberOfPoints, uint16_t width, uint16_t height , uint16_t gap);
 static void scoreFlashWrite(uint16_t Score);
-static uint16_t scoreFlashRead();
+static uint16_t scoreFlashRead(uint16_t *returnScore);
 /* USER CODE END 0 */
 
 /**
@@ -136,7 +137,10 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
-  int MAX_PUNKTOW=0;
+
+  scoreFlashWrite(0);
+  scoreFlashRead(&bestScore);
+
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
@@ -172,8 +176,7 @@ int main(void)
   uint16_t width = 10;
   uint16_t height= 10;
 
-//  uint16_t gap = 60;
-  uint16_t gap = scoreFlashRead();
+  uint16_t gap = 60;
   Generate_Obstacles(obstacles, OBSTACLES_NUMBER, width_limit, height_limit , gap);
   Generate_Item(point, POINTS_NUMBER, width, height, gap);
 
@@ -312,6 +315,7 @@ int main(void)
 		  tryb=5;
 		  break;
 	  case 5:
+		  scoreFlashRead(&bestScore);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-120, (uint8_t*)"---------------",LEFT_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-100, (uint8_t*)"Twoj Wynik",CENTER_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-79, (uint8_t*)"---------------",LEFT_MODE);
@@ -322,11 +326,12 @@ int main(void)
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+41, (uint8_t*)"Best score",CENTER_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+61, (uint8_t*)"---------------",LEFT_MODE);
 
-		  zmien_na_char(MAX_PUNKTOW,BSP_LCD_GetXSize()/2-20,BSP_LCD_GetYSize()/2+95);
+		  zmien_na_char(bestScore, BSP_LCD_GetXSize()/2-20, BSP_LCD_GetYSize()/2+95);
 
-		  if(punkty>=MAX_PUNKTOW)
+		  if(punkty > bestScore)
 		  {
-			  MAX_PUNKTOW=punkty;
+			  scoreFlashWrite(punkty);
+//			  bestScore=punkty;
 		  }
 
 		  ReloadFlag = 0;
@@ -797,7 +802,7 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void zmien_na_char(int pom,int x,int y)
+void zmien_na_char(uint16_t pom,int x,int y)
 {
 	if(pom<10)
 	{
@@ -938,10 +943,10 @@ void scoreFlashWrite(uint16_t Score)
 	HAL_FLASH_Lock();
 }
 
-uint16_t scoreFlashRead()
+uint16_t scoreFlashRead(uint16_t *returnScore)
 {
-	uint16_t returnScore = *(uint16_t*)FLASH_SECTOR_20;
-	return returnScore;
+	*returnScore = *(__IO uint16_t*)FLASH_SECTOR_20;
+	return *returnScore;
 }
 
 /**
