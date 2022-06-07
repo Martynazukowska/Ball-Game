@@ -28,9 +28,7 @@
 #include "FirstOrderIIR.h"
 #include "Obstacle.h"
 #include "punkty.h"
-//#include "st_logo1.h"
-//#include "st_logo2.h"
-//#include "Rectangle_2.h"
+#include "flash_f429zi.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,6 +54,7 @@
 #define BALL_Y 80
 #define BALL_RAY 15
 
+#define BEST_SCORE_ADDRESS (0x081FFFFF-8)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -85,8 +84,8 @@ __IO uint32_t ReloadFlag = 0;
 __IO float X = 0;
 __IO int gyro_flag = 0;
 __IO int tryb = 0;
-__IO int punkty = 0;
-__IO uint16_t bestScore = 0;
+uint32_t punkty = 0;
+uint32_t bestScore = 0;
 FirstOrderIIR_t filter;
 
 /* USER CODE END PV */
@@ -106,7 +105,7 @@ static void MX_TIM6_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-static void zmien_na_char(uint16_t pom,int x, int y);
+static void zmien_na_char(uint32_t pom,int x, int y);
 static void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_t width_limit, uint16_t height_limit , uint16_t gap);
 static void Generate_Item(Item *point, uint8_t NumberOfPoints, uint16_t width, uint16_t height , uint16_t gap);
 static void scoreFlashWrite(uint16_t Score);
@@ -137,10 +136,6 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
-
-  scoreFlashWrite(0);
-  scoreFlashRead(&bestScore);
-
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
@@ -156,7 +151,6 @@ int main(void)
   /* USER CODE BEGIN 2 */
   BSP_LCD_Init();
   BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER);
-//  BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER); //+ BUFFER_OFFSET
   BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
   BSP_LCD_Clear(LCD_COLOR_BLACK);
 
@@ -179,6 +173,9 @@ int main(void)
   uint16_t gap = 60;
   Generate_Obstacles(obstacles, OBSTACLES_NUMBER, width_limit, height_limit , gap);
   Generate_Item(point, POINTS_NUMBER, width, height, gap);
+
+  uint32_t tmp = 0;
+  Flash_Write_Data(BEST_SCORE_ADDRESS, &tmp, 1);
 
 
   HAL_TIM_Base_Start_IT(&htim6);
@@ -315,7 +312,7 @@ int main(void)
 		  tryb=5;
 		  break;
 	  case 5:
-		  scoreFlashRead(&bestScore);
+		  Flash_Read_Data(BEST_SCORE_ADDRESS, &bestScore, 1);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-120, (uint8_t*)"---------------",LEFT_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-100, (uint8_t*)"Twoj Wynik",CENTER_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-79, (uint8_t*)"---------------",LEFT_MODE);
@@ -330,7 +327,7 @@ int main(void)
 
 		  if(punkty > bestScore)
 		  {
-			  scoreFlashWrite(punkty);
+			  Flash_Write_Data(BEST_SCORE_ADDRESS, &punkty, 1);
 //			  bestScore=punkty;
 		  }
 
@@ -802,7 +799,7 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void zmien_na_char(uint16_t pom,int x,int y)
+void zmien_na_char(uint32_t pom,int x,int y)
 {
 	if(pom<10)
 	{
