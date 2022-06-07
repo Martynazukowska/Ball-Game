@@ -40,9 +40,9 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 //#define ALPHA 0.043213918263772265
-#define ALPHA 0.01229909354281272
-#define BETA_0 (1+ALPHA)/2
-#define BETA_1 -(1+ALPHA)/2
+#define ALPHA 0.01229f
+#define BETA_0 (1+ALPHA)/2.0
+#define BETA_1 -(1+ALPHA)/2.0
 #define DPS_SCALE_250 0.00875f
 #define DPS_SCALE_500 0.01750f
 #define DPS_SCALE_2000 0.070f
@@ -54,7 +54,7 @@
 #define BALL_Y 80
 #define BALL_RAY 15
 
-#define BEST_SCORE_ADDRESS (0x081FFFFF-8)
+#define BEST_SCORE_ADDRESS 0x08010000
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -174,11 +174,12 @@ int main(void)
   Generate_Obstacles(obstacles, OBSTACLES_NUMBER, width_limit, height_limit , gap);
   Generate_Item(point, POINTS_NUMBER, width, height, gap);
 
-  uint32_t tmp = 0;
-  Flash_Write_Data(BEST_SCORE_ADDRESS, &tmp, 1);
+//  uint32_t tmp = 0;
+//  Flash_Write_Data(BEST_SCORE_ADDRESS, &tmp, 1);
 
 
   HAL_TIM_Base_Start_IT(&htim6);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -312,6 +313,8 @@ int main(void)
 		  tryb=5;
 		  break;
 	  case 5:
+		  HAL_TIM_Base_Stop_IT(&htim6);
+
 		  Flash_Read_Data(BEST_SCORE_ADDRESS, &bestScore, 1);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-120, (uint8_t*)"---------------",LEFT_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-100, (uint8_t*)"Twoj Wynik",CENTER_MODE);
@@ -336,6 +339,10 @@ int main(void)
 		  while(ReloadFlag == 0) {} /* wait till reload takes effect */
 		  HAL_Delay(4000);
 		  BSP_LCD_Clear(LCD_COLOR_BLACK);
+
+		  FirstOrderIIR_Init(&filter, ALPHA, BETA_0, BETA_1);
+		  HAL_TIM_Base_Start_IT(&htim6);
+
 		  tryb=0;
 		  break;
 	  }
