@@ -29,6 +29,7 @@
 #include "Obstacle.h"
 #include "punkty.h"
 #include "flash_f429zi.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -119,6 +120,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
 	ObstacleDef obstacles[OBSTACLES_NUMBER];
 	Item point[POINTS_NUMBER];
+	char scoreChar[4];
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -233,7 +235,8 @@ int main(void)
 		  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
 		  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
 
-		  zmien_na_char(punkty,200,50);
+		  sprintf(scoreChar, "%d", (int)punkty);
+		  BSP_LCD_DisplayStringAt(0, 50, (uint8_t*)scoreChar, RIGHT_MODE);
 
 		  if(gyro_flag == 1)
 		  	  {
@@ -269,9 +272,9 @@ int main(void)
 		  	  }
 		  	  int score;
 		  	  score=IfScore(point, POINTS_NUMBER, Xpos, BALL_Y, BALL_RAY);
-		  	  punkty=punkty+score;
+		  	  punkty += score;
 
-		  	 if(punkty>=50)
+		  	 if(punkty>=999)
 		  	 {
 		  		tryb=4;
 		  		HAL_Delay(500);
@@ -311,6 +314,7 @@ int main(void)
 		  tryb=5;
 		  break;
 	  case 5:
+
 		  HAL_TIM_Base_Stop_IT(&htim6);
 
 		  Flash_Read_Data(BEST_SCORE_ADDRESS, &bestScore, 1);
@@ -318,13 +322,17 @@ int main(void)
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-100, (uint8_t*)"Twoj Wynik",CENTER_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-79, (uint8_t*)"---------------",LEFT_MODE);
 
-		  zmien_na_char(punkty,BSP_LCD_GetXSize()/2-20,BSP_LCD_GetYSize()/2-45);
+//		  zmien_na_char(punkty,BSP_LCD_GetXSize()/2-20,BSP_LCD_GetYSize()/2-45);
+		  sprintf(scoreChar, "%d", (int)punkty);
+		  BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2-45, (uint8_t*)scoreChar, CENTER_MODE);
 
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+20, (uint8_t*)"---------------",LEFT_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+41, (uint8_t*)"Best score",CENTER_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+61, (uint8_t*)"---------------",LEFT_MODE);
 
-		  zmien_na_char(bestScore, BSP_LCD_GetXSize()/2-20, BSP_LCD_GetYSize()/2+95);
+		  sprintf(scoreChar, "%d", (int)bestScore);
+		  BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2+95, (uint8_t*)scoreChar, CENTER_MODE);
+//		  zmien_na_char(bestScore, BSP_LCD_GetXSize()/2-20, BSP_LCD_GetYSize()/2+95);
 
 		  if(punkty > bestScore)
 		  {
