@@ -108,8 +108,6 @@ static void MX_TIM6_Init(void);
 static void zmien_na_char(uint32_t pom,int x, int y);
 static void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_t width_limit, uint16_t height_limit , uint16_t gap);
 static void Generate_Item(Item *point, uint8_t NumberOfPoints, uint16_t width, uint16_t height , uint16_t gap);
-static void scoreFlashWrite(uint16_t Score);
-static uint16_t scoreFlashRead(uint16_t *returnScore);
 /* USER CODE END 0 */
 
 /**
@@ -227,7 +225,7 @@ int main(void)
 
 		Generate_Obstacles(obstacles, OBSTACLES_NUMBER, width_limit, height_limit , gap);
 		Generate_Item(point, POINTS_NUMBER, width, height, gap);
-
+		Xpos = BSP_LCD_GetXSize()/2;
 		tryb=2;
 		  break;
 	  case 2:
@@ -921,36 +919,6 @@ void Generate_Item(Item *point, uint8_t NumberOfPointss, uint16_t width_limit, u
 			width = 10;
 		Item_Init(&point[i], X, Y, width, height_limit);
 	}
-}
-
-void scoreFlashWrite(uint16_t Score)
-{
-	uint32_t SECTORError;
-	FLASH_EraseInitTypeDef eraseStruct;
-	eraseStruct.TypeErase = FLASH_TYPEERASE_SECTORS;   /*!< Mass erase or sector Erase.*/
-	eraseStruct.Sector = 	FLASH_SECTOR_20;      /*!< Initial FLASH sector to erase when Mass erase is disabled*/
-	eraseStruct.NbSectors = 1;   /*!< Number of sectors to be erased.*/
-	eraseStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
-
-	HAL_FLASH_Unlock();
-	if(HAL_FLASHEx_Erase(&eraseStruct, &SECTORError) != HAL_OK)
-	{
-		BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-30, (uint8_t*)"ERROR REMOVING PREVIOUS SCORE",CENTER_MODE);
-		return;
-	}
-
-	if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, FLASH_SECTOR_20, (uint64_t)Score) != HAL_OK)
-	{
-		BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-30, (uint8_t*)"ERROR SAVING NEW SCORE",CENTER_MODE);
-		return;
-	}
-	HAL_FLASH_Lock();
-}
-
-uint16_t scoreFlashRead(uint16_t *returnScore)
-{
-	*returnScore = *(__IO uint16_t*)FLASH_SECTOR_20;
-	return *returnScore;
 }
 
 /**
