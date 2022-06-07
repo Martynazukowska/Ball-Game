@@ -230,13 +230,13 @@ uint32_t Flash_Write_Data (uint32_t StartSectorAddress, uint32_t *Data, uint16_t
 
 void Flash_Read_Data (uint32_t StartSectorAddress, uint32_t *RxBuf, uint16_t numberofwords)
 {
-	while (1)
+	uint16_t count = 0;
+	while (numberofwords > count)
 	{
-
 		*RxBuf = *(__IO uint32_t *)StartSectorAddress;
 		StartSectorAddress += 4;
 		RxBuf++;
-		if (!(numberofwords--)) break;
+		count++;
 	}
 }
 
