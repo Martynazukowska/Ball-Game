@@ -322,7 +322,6 @@ int main(void)
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-100, (uint8_t*)"Twoj Wynik",CENTER_MODE);
 		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-79, (uint8_t*)"---------------",LEFT_MODE);
 
-//		  zmien_na_char(punkty,BSP_LCD_GetXSize()/2-20,BSP_LCD_GetYSize()/2-45);
 		  sprintf(scoreChar, "%d", (int)punkty);
 		  BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2-45, (uint8_t*)scoreChar, CENTER_MODE);
 
@@ -332,12 +331,11 @@ int main(void)
 
 		  sprintf(scoreChar, "%d", (int)bestScore);
 		  BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2+95, (uint8_t*)scoreChar, CENTER_MODE);
-//		  zmien_na_char(bestScore, BSP_LCD_GetXSize()/2-20, BSP_LCD_GetYSize()/2+95);
+
 
 		  if(punkty > bestScore)
 		  {
 			  Flash_Write_Data(BEST_SCORE_ADDRESS, &punkty, 1);
-//			  bestScore=punkty;
 		  }
 
 		  ReloadFlag = 0;
