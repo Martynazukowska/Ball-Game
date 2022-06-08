@@ -12,6 +12,7 @@ STM32F429I-DISCO1, gyroscope and lcd
 - Start and Reset
 - Game rules
 - Refine restart and draw generate new obstacles
+- Saving best score to flash memeory
 
 # To do
 - Work with layers
