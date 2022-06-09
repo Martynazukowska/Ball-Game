@@ -189,6 +189,18 @@ int IfScore(Item *point, uint8_t NumberOfPoints, int16_t X_ball, int16_t Y_ball,
 					return 1;
 			}
 		}
+
+		if(point[i].zdobyty==0 && Y_ball > point[i].Ypos && Y_ball < point[i].Ypos + point[i].Height)
+		{
+			if( (X_ball + Ray > point[i].Xpos && X_ball + Ray < point[i].Xpos + point[i].Width) || (X_ball - Ray > point[i].Xpos && X_ball - Ray < point[i].Xpos + point[i].Width))
+			{
+				point[i].zdobyty=1;
+				if(point[i].specjalny==1)
+					return 5;
+				else
+					return 1;
+			}
+		}
 	}
 	return 0;
 }

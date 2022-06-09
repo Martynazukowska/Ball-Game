@@ -238,6 +238,14 @@ int IfCollisionDetect(ObstacleDef *obstacle, uint8_t NumberOfObjects, int16_t X_
 				return 1;
 			}
 		}
+
+		if(Y_ball > obstacle[i].Ypos && Y_ball < obstacle[i].Ypos + obstacle[i].Height)
+		{
+			if( (X_ball + Ray > obstacle[i].Xpos && X_ball + Ray < obstacle[i].Xpos + obstacle[i].Width) || (X_ball - Ray > obstacle[i].Xpos && X_ball - Ray < obstacle[i].Xpos + obstacle[i].Width))
+			{
+				return 1;
+			}
+		}
 	}
 	return 0;
 }
