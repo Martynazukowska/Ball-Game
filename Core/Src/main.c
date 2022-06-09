@@ -106,7 +106,6 @@ static void MX_TIM6_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-static void zmien_na_char(uint32_t pom,int x, int y);
 static void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_t width_limit, uint16_t height_limit , uint16_t gap);
 static void Generate_Item(Item *point, uint8_t NumberOfPoints, uint16_t width, uint16_t height , uint16_t gap);
 /* USER CODE END 0 */
@@ -812,70 +811,7 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void zmien_na_char(uint32_t pom,int x,int y)
-{
-	if(pom<10)
-	{
-		char punkty=pom+'0';
-		BSP_LCD_DisplayChar(x,y,punkty);
-	}
-	else
-	{
-		if(pom<20)
-		{
-			pom=pom%10;
-			char punkty=pom+'0';
-			char jeden=1+'0';
-			BSP_LCD_DisplayChar(x,y,jeden);
-			BSP_LCD_DisplayChar(x+15,y,punkty);
-		}
-		else
-		{
-			if(pom<30)
-			{
-				pom=pom%10;
-				char punkty=pom+'0';
-				char dwa=2 +'0';
-				BSP_LCD_DisplayChar(x,y,dwa);
-				BSP_LCD_DisplayChar(x+15,y,punkty);
-			}
-			else
-			{
-				if(pom<40)
-				{
-					pom=pom%10;
-					char punkty=pom+'0';
-					char trzy=3 +'0';
-					BSP_LCD_DisplayChar(x,y,trzy);
-					BSP_LCD_DisplayChar(x+15,y,punkty);
-				}
-				else
-				{
-					if(pom<50)
-					{
-						pom=pom%10;
-						char punkty=pom+'0';
-						char cztery=4 +'0';
-						BSP_LCD_DisplayChar(x,y,cztery);
-						BSP_LCD_DisplayChar(x+15,y,punkty);
-					}
-					else
-					{
-						if(pom<60)
-						{
-							pom=pom%10;
-							char punkty=pom+'0';
-							char piec=5 +'0';
-							BSP_LCD_DisplayChar(x,y,piec);
-							BSP_LCD_DisplayChar(x+15,y,punkty);
-										}
-									}
-				}
-			}
-		}
-	}
 
-}
 
 void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_t width_limit, uint16_t height_limit, uint16_t gap)
 {
