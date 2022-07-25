@@ -27,9 +27,9 @@
 #include "stm32f429i_discovery_gyroscope.h"
 #include "FirstOrderIIR.h"
 #include "Obstacle.h"
-//#include "st_logo1.h"
-//#include "st_logo2.h"
-//#include "Rectangle_2.h"
+#include "punkty.h"
+#include "flash_f429zi.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,15 +41,21 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 //#define ALPHA 0.043213918263772265
-#define ALPHA 0.01229909354281272
-#define BETA_0 (1+ALPHA)/2
-#define BETA_1 -(1+ALPHA)/2
+#define ALPHA 0.01229f
+#define BETA_0 (1+ALPHA)/2.0
+#define BETA_1 -(1+ALPHA)/2.0
 #define DPS_SCALE_250 0.00875f
 #define DPS_SCALE_500 0.01750f
 #define DPS_SCALE_2000 0.070f
 #define DPS_SCALE_USER 0.00095f
 #define OBSTACLES_NUMBER 5
-//#define BETA 0.75279f
+#define POINTS_NUMBER 2
+
+
+#define BALL_Y 80
+#define BALL_RAY 15
+
+#define BEST_SCORE_ADDRESS 0x08010000
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -78,6 +84,9 @@ LTDC_HandleTypeDef LtdcHandle;
 __IO uint32_t ReloadFlag = 0;
 __IO float X = 0;
 __IO int gyro_flag = 0;
+__IO int tryb = 0;
+uint32_t punkty = 0;
+uint32_t bestScore = 0;
 FirstOrderIIR_t filter;
 
 /* USER CODE END PV */
@@ -92,12 +101,13 @@ static void MX_LTDC_Init(void);
 static void MX_SPI5_Init(void);
 static void MX_TIM6_Init(void);
 /* USER CODE BEGIN PFP */
-static void LCD_Config(void);
+//static void LCD_Config(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 static void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_t width_limit, uint16_t height_limit , uint16_t gap);
+static void Generate_Item(Item *point, uint8_t NumberOfPoints, uint16_t width, uint16_t height , uint16_t gap);
 /* USER CODE END 0 */
 
 /**
@@ -108,6 +118,8 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	ObstacleDef obstacles[OBSTACLES_NUMBER];
+	Item point[POINTS_NUMBER];
+	char scoreChar[4];
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -137,13 +149,11 @@ int main(void)
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
   BSP_LCD_Init();
-  BSP_LCD_LayerDefaultInit(LCD_BACKGROUND_LAYER, LCD_FRAME_BUFFER);
-  BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER); //+ BUFFER_OFFSET
-  BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
-  BSP_LCD_DisplayOn();
+  BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER);
+  BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
   BSP_LCD_Clear(LCD_COLOR_BLACK);
+
   /* Configure 2 layers w/ Blending */
-  LCD_Config();	//bez niej nie ma przerwania dla wyświetlania
    /* Gyroscope init */
   if(BSP_GYRO_Init() != GYRO_OK)
   {
@@ -153,54 +163,193 @@ int main(void)
   BSP_GYRO_Reset();
 
   float Xpos = BSP_LCD_GetXSize()/2;
-  int Ypos = 60;
-
   uint16_t width_limit = 80;
   uint16_t height_limit = 10;
+
+  uint16_t width = 10;
+  uint16_t height= 10;
+
   uint16_t gap = 60;
   Generate_Obstacles(obstacles, OBSTACLES_NUMBER, width_limit, height_limit , gap);
+  Generate_Item(point, POINTS_NUMBER, width, height, gap);
+
+//  uint32_t tmp = 0;
+//  Flash_Write_Data(BEST_SCORE_ADDRESS, &tmp, 1);
+
 
   HAL_TIM_Base_Start_IT(&htim6);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if(gyro_flag == 1)
+	  if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0))
 	  {
-		  gyro_flag = 0;
-		  Xpos += X;
-
-		  if(Xpos > BSP_LCD_GetXSize() - 20)
-			  Xpos = BSP_LCD_GetXSize() - 20;
-		  else if(Xpos <20)
-			  Xpos = 20;
+		 tryb=1;
 	  }
+	  else
+	  {
+	  switch(tryb)
+	  {
+	  case 0:
+		  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+		  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-30, (uint8_t*)"NACISNIJ",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2, (uint8_t*)"NIEBIESKI",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+30, (uint8_t*)"PRZYCISK",CENTER_MODE);
 
-//	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
-//	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
-	  ParityObstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
-	  MultiObstacle_Move(obstacles, OBSTACLES_NUMBER, 0, -1);
-	  MultiObstacle_Draw(obstacles, OBSTACLES_NUMBER);
+		  ReloadFlag = 0;
+		  BSP_LCD_Relaod(LCD_RELOAD_VERTICAL_BLANKING);
+		  while(ReloadFlag == 0) {} /* wait till reload takes effect */
+		  HAL_Delay(10);
+		  BSP_LCD_Clear(LCD_COLOR_BLACK);
+		  punkty=0;
+		  break;
+	  case 1:
+		BSP_LCD_Clear(LCD_COLOR_BLACK);
+		BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+		BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
+		BSP_LCD_Clear(LCD_COLOR_BLACK);
+		BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-10, (uint8_t*)"3",CENTER_MODE);
+		HAL_Delay(1000);
+		BSP_LCD_Clear(LCD_COLOR_BLACK);
+		BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-10, (uint8_t*)"2",CENTER_MODE);
+		HAL_Delay(1000);
+		BSP_LCD_Clear(LCD_COLOR_BLACK);
+		BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-10, (uint8_t*)"1",CENTER_MODE);
+		HAL_Delay(1000);
+		BSP_LCD_Clear(LCD_COLOR_BLACK);
+		BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-10, (uint8_t*)"START",CENTER_MODE);
+		HAL_Delay(1000);
 
-//	  Foreground Layer
-	  BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
-	  BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
-	  BSP_LCD_FillCircle(Xpos, Ypos+20, 20);
+		Generate_Obstacles(obstacles, OBSTACLES_NUMBER, width_limit, height_limit , gap);
+		Generate_Item(point, POINTS_NUMBER, width, height, gap);
+		Xpos = BSP_LCD_GetXSize()/2;
+		tryb=2;
+		  break;
+	  case 2:
 
-	  HAL_LTDC_SetWindowPosition_NoReload(&LtdcHandle, 0, 0, 0);
-	  /* reconfigure the layer2 position  without Reloading*/
-	  HAL_LTDC_SetWindowPosition_NoReload(&LtdcHandle, 0, 0, 1);
-	  /* Ask for LTDC reload within next vertical blanking*/
-	  ReloadFlag = 0;
+		  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+		  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
 
-	  HAL_LTDC_Reload(&LtdcHandle,LTDC_SRCR_VBR);
+		  sprintf(scoreChar, "%d", (int)punkty);
+		  BSP_LCD_DisplayStringAt(0, 50, (uint8_t*)scoreChar, RIGHT_MODE);
 
-	  while(ReloadFlag == 0) 	{/* wait till reload takes effect */}
+		  if(gyro_flag == 1)
+		  	  {
+		  		  gyro_flag = 0;
+		  		  Xpos += X;
 
-	  BSP_LCD_Clear(LCD_COLOR_BLACK);
+		  		  if(Xpos > BSP_LCD_GetXSize() - 20)
+		  			  Xpos = BSP_LCD_GetXSize() - 20;
+		  		  else if(Xpos <20)
+		  			  Xpos = 20;
+		  	  }
 
+	  //	  Obstacle_Overflow(obstacles, OBSTACLES_NUMBER);
+	  //	  Obstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
+
+		  	  ParityItem_OverflowRandom(point, POINTS_NUMBER, width_limit);
+		  	  MultiItem_Move(point, POINTS_NUMBER, 0, -1);
+		   	  MultiItem_Draw(point, POINTS_NUMBER);
+
+
+		  	  ParityObstacle_OverflowRandom(obstacles, OBSTACLES_NUMBER, width_limit);
+		  	  MultiObstacle_Move(obstacles, OBSTACLES_NUMBER, 0, -1);
+		  	  MultiObstacle_Draw(obstacles, OBSTACLES_NUMBER);
+
+
+		  	  BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
+		  	  BSP_LCD_FillCircle(Xpos, BALL_Y, BALL_RAY);
+
+		  	  if(IfCollisionDetect(obstacles, OBSTACLES_NUMBER, Xpos, BALL_Y, BALL_RAY))
+		  	  {
+		  		  tryb=3;
+		  		  HAL_Delay(2000);
+		  	  }
+		  	  int score;
+		  	  score=IfScore(point, POINTS_NUMBER, Xpos, BALL_Y, BALL_RAY);
+		  	  punkty += score;
+
+		  	 if(punkty>=999)
+		  	 {
+		  		tryb=4;
+		  		HAL_Delay(500);
+		  	  }
+
+		  	  ReloadFlag = 0;
+		  	  BSP_LCD_Relaod(LCD_RELOAD_VERTICAL_BLANKING);
+		  	  while(ReloadFlag == 0) {} /* wait till reload takes effect */
+		  	  BSP_LCD_Clear(LCD_COLOR_BLACK);
+
+		  break;
+	  case 3:
+		  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+		  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-30, (uint8_t*)"MALA",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2, (uint8_t*)"KOLIZJA",CENTER_MODE);
+
+		  ReloadFlag = 0;
+ 		  BSP_LCD_Relaod(LCD_RELOAD_VERTICAL_BLANKING);
+		  while(ReloadFlag == 0) {} /* wait till reload takes effect */
+		  HAL_Delay(1500);
+		  BSP_LCD_Clear(LCD_COLOR_BLACK);
+		  tryb=5;
+		  break;
+	  case 4:
+		  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+		  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-30, (uint8_t*)"GRATULACJE",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2, (uint8_t*)"POKONALES",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+30, (uint8_t*)"MNIE",CENTER_MODE);
+
+		  ReloadFlag = 0;
+		  BSP_LCD_Relaod(LCD_RELOAD_VERTICAL_BLANKING);
+		  while(ReloadFlag == 0) {} /* wait till reload takes effect */
+		  HAL_Delay(1500);
+		  BSP_LCD_Clear(LCD_COLOR_BLACK);
+		  tryb=5;
+		  break;
+	  case 5:
+
+		  HAL_TIM_Base_Stop_IT(&htim6);
+
+		  Flash_Read_Data(BEST_SCORE_ADDRESS, &bestScore, 1);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-120, (uint8_t*)"---------------",LEFT_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-100, (uint8_t*)"Twoj Wynik",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2-79, (uint8_t*)"---------------",LEFT_MODE);
+
+		  sprintf(scoreChar, "%d", (int)punkty);
+		  BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2-45, (uint8_t*)scoreChar, CENTER_MODE);
+
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+20, (uint8_t*)"---------------",LEFT_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+41, (uint8_t*)"Best score",CENTER_MODE);
+		  BSP_LCD_DisplayStringAt(0,BSP_LCD_GetYSize()/2+61, (uint8_t*)"---------------",LEFT_MODE);
+
+		  sprintf(scoreChar, "%d", (int)bestScore);
+		  BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2+95, (uint8_t*)scoreChar, CENTER_MODE);
+
+
+		  if(punkty > bestScore)
+		  {
+			  Flash_Write_Data(BEST_SCORE_ADDRESS, &punkty, 1);
+		  }
+
+		  ReloadFlag = 0;
+		  BSP_LCD_Relaod(LCD_RELOAD_VERTICAL_BLANKING);
+		  while(ReloadFlag == 0) {} /* wait till reload takes effect */
+		  HAL_Delay(4000);
+		  BSP_LCD_Clear(LCD_COLOR_BLACK);
+
+		  FirstOrderIIR_Init(&filter, ALPHA, BETA_0, BETA_1);
+		  HAL_TIM_Base_Start_IT(&htim6);
+
+		  tryb=0;
+		  break;
+	  }
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -406,7 +555,7 @@ static void MX_LTDC_Init(void)
   pLayerCfg1.Alpha0 = 0;
   pLayerCfg1.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
   pLayerCfg1.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-  pLayerCfg1.FBStartAdress = 0xD0050000;
+  pLayerCfg1.FBStartAdress = 0;
   pLayerCfg1.ImageWidth = 0;
   pLayerCfg1.ImageHeight = 0;
   pLayerCfg1.Backcolor.Blue = 0;
@@ -583,8 +732,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : B1_Pin MEMS_INT1_Pin MEMS_INT2_Pin TP_INT1_Pin */
-  GPIO_InitStruct.Pin = B1_Pin|MEMS_INT1_Pin|MEMS_INT2_Pin|TP_INT1_Pin;
+  /*Configure GPIO pin : PA0 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : MEMS_INT1_Pin MEMS_INT2_Pin TP_INT1_Pin */
+  GPIO_InitStruct.Pin = MEMS_INT1_Pin|MEMS_INT2_Pin|TP_INT1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_EVT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -654,6 +809,8 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+
+
 void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_t width_limit, uint16_t height_limit, uint16_t gap)
 {
 	int16_t X;
@@ -678,164 +835,32 @@ void Generate_Obstacles(ObstacleDef *obstacles, uint8_t NumberOfObjects, uint16_
 	}
 }
 
-/**
-  * @brief LCD Configuration.
-  * @note  This function Configure the LTDC peripheral :
-  *        1) Configure the Pixel Clock for the LCD
-  *        2) Configure the LTDC Timing and Polarity
-  *        3) Configure the LTDC Layer 1 :
-  *           - direct color (RGB565) as pixel format
-  *           - The frame buffer is located at FLASH memory
-  *           - The Layer size configuration : 240x160
-  *        4) Configure the LTDC Layer 2 :
-  *           - direct color (RGB565) as pixel format
-  *           - The frame buffer is located at FLASH memory
-  *           - The Layer size configuration : 240x160
-  * @retval
-  *  None
-  */
-static void LCD_Config(void)
+
+void Generate_Item(Item *point, uint8_t NumberOfPointss, uint16_t width_limit, uint16_t height_limit, uint16_t gap)
 {
-  LTDC_LayerCfgTypeDef pLayerCfg;
-  LTDC_LayerCfgTypeDef pLayerCfg1;
+	int16_t X;
+	int16_t Y = BSP_LCD_GetYSize();
+	uint16_t width;
 
-  /* Initialization of ILI9341 component*/
-  ili9341_Init();
+	for(uint8_t i = 0; i < NumberOfPointss; ++i)
+	{
+		int random;
+		random=rand()%2;
+		random=random+1;
+		X = rand() % BSP_LCD_GetXSize() + 40;
+		Y += (random*gap)+15;
 
-/* LTDC Initialization -------------------------------------------------------*/
-
-  /* Polarity configuration */
-  /* Initialize the horizontal synchronization polarity as active low */
-  LtdcHandle.Init.HSPolarity = LTDC_HSPOLARITY_AL;
-  /* Initialize the vertical synchronization polarity as active low */
-  LtdcHandle.Init.VSPolarity = LTDC_VSPOLARITY_AL;
-  /* Initialize the data enable polarity as active low */
-  LtdcHandle.Init.DEPolarity = LTDC_DEPOLARITY_AL;
-  /* Initialize the pixel clock polarity as input pixel clock */
-  LtdcHandle.Init.PCPolarity = LTDC_PCPOLARITY_IPC;
-
-  /* Timing configuration  (Typical configuration from ILI9341 datasheet)
-      HSYNC=10 (9+1)
-      HBP=20 (29-10+1)
-      ActiveW=240 (269-20-10+1)
-      HFP=10 (279-240-20-10+1)
-
-      VSYNC=2 (1+1)
-      VBP=2 (3-2+1)
-      ActiveH=320 (323-2-2+1)
-      VFP=4 (327-320-2-2+1)
-  */
-
-  /* Timing configuration */
-  /* Horizontal synchronization width = Hsync - 1 */
-  LtdcHandle.Init.HorizontalSync = 9;
-  /* Vertical synchronization height = Vsync - 1 */
-  LtdcHandle.Init.VerticalSync = 1;
-  /* Accumulated horizontal back porch = Hsync + HBP - 1 */
-  LtdcHandle.Init.AccumulatedHBP = 29;
-  /* Accumulated vertical back porch = Vsync + VBP - 1 */
-  LtdcHandle.Init.AccumulatedVBP = 3;
-  /* Accumulated active width = Hsync + HBP + Active Width - 1 */
-  LtdcHandle.Init.AccumulatedActiveH = 323;
-  /* Accumulated active height = Vsync + VBP + Active Heigh - 1 */
-  LtdcHandle.Init.AccumulatedActiveW = 269;
-  /* Total height = Vsync + VBP + Active Heigh + VFP - 1 */
-  LtdcHandle.Init.TotalHeigh = 327;
-  /* Total width = Hsync + HBP + Active Width + HFP - 1 */
-  LtdcHandle.Init.TotalWidth = 279;
-
-  /* Configure R,G,B component values for LCD background color */
-  LtdcHandle.Init.Backcolor.Blue = 0;
-  LtdcHandle.Init.Backcolor.Green = 0;
-  LtdcHandle.Init.Backcolor.Red = 0;
-
-  LtdcHandle.Instance = LTDC;
-
-/* Layer1 Configuration ------------------------------------------------------*/
-
-  /* Windowing configuration */
-  pLayerCfg.WindowX0 = 0;
-  pLayerCfg.WindowX1 = BSP_LCD_GetXSize();
-  pLayerCfg.WindowY0 = 0;
-  pLayerCfg.WindowY1 = BSP_LCD_GetYSize();
-
-  /* Pixel Format configuration*/
-
-//  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
-  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_ARGB8888;
-  /* Start Address configuration : frame buffer is located at FLASH memory */
-  //pLayerCfg.FBStartAdress = (uint32_t)&ST_LOGO_1;
-  pLayerCfg.FBStartAdress=0xD0000000;
-
-  /* Alpha constant (255 totally opaque) */
-  pLayerCfg.Alpha = 255;
-
-  /* Default Color configuration (configure A,R,G,B component values) */
-  pLayerCfg.Alpha0 = 0;
-  pLayerCfg.Backcolor.Blue = 0;
-  pLayerCfg.Backcolor.Green = 0;
-  pLayerCfg.Backcolor.Red = 0;
-
-  /* Configure blending factors */
-  pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_PAxCA;
-  pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_PAxCA;
-
-  /* Configure the number of lines and number of pixels per line */
-  pLayerCfg.ImageWidth = BSP_LCD_GetXSize();
-  pLayerCfg.ImageHeight = BSP_LCD_GetYSize() ;
-
-/* Layer2 Configuration ------------------------------------------------------*/
-
-  /* Windowing configuration */
-  pLayerCfg1.WindowX0 = 0;
-  pLayerCfg1.WindowX1 = BSP_LCD_GetXSize();
-  pLayerCfg1.WindowY0 = 0;
-  pLayerCfg1.WindowY1 = BSP_LCD_GetYSize();
-
-  /* Pixel Format configuration*/
-//  pLayerCfg1.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
-  pLayerCfg1.PixelFormat =LTDC_PIXEL_FORMAT_ARGB8888;
-  /* Start Address configuration : frame buffer is located at FLASH memory */
- // pLayerCfg1.FBStartAdress = (uint32_t)&ST_LOGO_2;
-  pLayerCfg1.FBStartAdress =0xD0000000;
-
-  /* Alpha constant (255 totally opaque) */
-  pLayerCfg1.Alpha = 200;
-
-  /* Default Color configuration (configure A,R,G,B component values) */
-  pLayerCfg1.Alpha0 = 0;
-  pLayerCfg1.Backcolor.Blue = 0;
-  pLayerCfg1.Backcolor.Green = 0;
-  pLayerCfg1.Backcolor.Red = 0;
-
-//  /* Configure blending factors */
-  pLayerCfg1.BlendingFactor1 = LTDC_BLENDING_FACTOR1_PAxCA;
-  pLayerCfg1.BlendingFactor2 = LTDC_BLENDING_FACTOR2_PAxCA;
-
-  /* Configure the number of lines and number of pixels per line */
-  pLayerCfg1.ImageWidth = BSP_LCD_GetXSize();
-  pLayerCfg1.ImageHeight = BSP_LCD_GetYSize();
-
-  /* Configure the LTDC */
-  if(HAL_LTDC_Init(&LtdcHandle) != HAL_OK)
-  {
-    /* Initialization Error */
-    Error_Handler();
-  }
-
-  /* Configure the Background Layer*/
-  if(HAL_LTDC_ConfigLayer(&LtdcHandle, &pLayerCfg, 0) != HAL_OK)
-  {
-    /* Initialization Error */
-    Error_Handler();
-  }
-
-  /* Configure the Foreground Layer*/
-  if(HAL_LTDC_ConfigLayer(&LtdcHandle, &pLayerCfg1, 1) != HAL_OK)
-  {
-    /* Initialization Error */
-    Error_Handler();
-  }
+		if(BSP_LCD_GetXSize() - X < 50)
+			width = 10;
+		else if(BSP_LCD_GetXSize() - X > BSP_LCD_GetXSize() - 50)
+		{
+			X = 0;
+			width = 10;
+		}
+		else
+			width = 10;
+		Item_Init(&point[i], X, Y, width, height_limit);
+	}
 }
 
 /**
